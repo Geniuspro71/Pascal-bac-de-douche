@@ -31,7 +31,7 @@ jobs:
         run: |
           for i in $(seq 1 18); do
             code=$(curl -L -s -o /tmp/site.html -w "%{http_code}" "https://geniuspro71.github.io/Pascal-bac-de-douche/?check=${GITHUB_SHA}")
-            if [ "$code" = "200" ] && grep -q "Piatto doccia · inox" /tmp/site.html && grep -q "CircleGeometry(.05,128)" /tmp/site.html && grep -q "Quote ON" /tmp/site.html; then
+            if [ "$code" = "200" ] && grep -q "Piatto doccia · inox" /tmp/site.html && grep -q "apertura circolare reale" /tmp/site.html && grep -q "CylinderGeometry(.05,.05,.026,128,1,true)" /tmp/site.html && grep -q "Quote ON" /tmp/site.html; then
               echo "GitHub Pages risponde HTTP 200"
               exit 0
             fi
