@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <title>Piatto doccia inox 240 × 80 cm</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#11181d;color:#f3f6f7;font:15px system-ui,-apple-system,sans-serif}#view{position:absolute;inset:0;touch-action:none}canvas{display:block;width:100%;height:100%;touch-action:none}.panel{position:absolute;top:12px;left:12px;padding:12px 14px;max-width:calc(100% - 24px);border:1px solid #ffffff25;border-radius:12px;background:#11191fdf;backdrop-filter:blur(12px);pointer-events:none}h1{font-size:16px;margin:0 0 5px;font-weight:650}.sub{font-size:12px;color:#c2cdd2;line-height:1.5}.actions{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:7px;max-width:calc(100% - 16px)}button{border:1px solid #ffffff45;border-radius:10px;background:#253640;color:#f5f8fa;padding:11px 12px;font-size:13px;white-space:nowrap}button:active{background:#405a67}#hint{position:absolute;bottom:67px;left:50%;transform:translateX(-50%);font-size:12px;color:#d0d9dd;background:#11191fdf;padding:7px 11px;border-radius:8px;white-space:nowrap;pointer-events:none}#error{display:none;position:absolute;left:12px;right:12px;top:100px;padding:12px;background:#452d25;color:#fff;border-radius:10px;font-size:13px}
@@ -23,7 +23,7 @@ try{
  const scene=new THREE.Scene();scene.background=new THREE.Color(0x20272b);
  const camera=new THREE.PerspectiveCamera(36,1,.01,100);camera.up.set(0,0,1);
  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
- renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.88;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);
  const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.075;controls.minDistance=1.5;controls.maxDistance=8;controls.target.set(0,0,0);
  // Physically based studio room environment with large reflection panels.
  const pmrem=new THREE.PMREMGenerator(renderer);pmrem.compileEquirectangularShader();
@@ -44,28 +44,28 @@ try{
    const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=renderer.capabilities.getMaxAnisotropy();return t;
  }
  const floorMarble=marbleTexture(7821),wallMarble=marbleTexture(1427);
- const floorMat=new THREE.MeshStandardMaterial({map:floorMarble,bumpMap:floorMarble,bumpScale:.0025,color:0xffffff,roughness:.31,metalness:0});
- const floor=new THREE.Mesh(new THREE.PlaneGeometry(6,5),floorMat);floor.position.set(0,0,-.125);floor.receiveShadow=true;scene.add(floor);
+ const floorMat=new THREE.MeshStandardMaterial({map:floorMarble,bumpMap:floorMarble,bumpScale:.0015,color:0xd5d3cc,roughness:.46,metalness:0});
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(6,5),floorMat);floor.position.set(0,0,-.05);floor.receiveShadow=true;scene.add(floor);
  const grout=new THREE.LineBasicMaterial({color:0x777b7b,transparent:true,opacity:.5});
- for(let x=-3;x<=3.01;x+=.8){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,-2.5,-.122),new THREE.Vector3(x,2.5,-.122)]),grout);scene.add(l)}
- for(let y=-2.5;y<=2.51;y+=.8){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,y,-.122),new THREE.Vector3(3,y,-.122)]),grout);scene.add(l)}
+ for(let x=-3;x<=3.01;x+=.8){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,-2.5,-.047),new THREE.Vector3(x,2.5,-.047)]),grout);scene.add(l)}
+ for(let y=-2.5;y<=2.51;y+=.8){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,y,-.047),new THREE.Vector3(3,y,-.047)]),grout);scene.add(l)}
  const wallMat=new THREE.MeshStandardMaterial({map:wallMarble,bumpMap:wallMarble,bumpScale:.0018,color:0xffffff,roughness:.34,metalness:0});
  const wall=new THREE.Mesh(new THREE.PlaneGeometry(6,3),wallMat);wall.rotation.x=Math.PI/2;wall.position.set(0,.78,1.35);wall.receiveShadow=true;scene.add(wall);
  for(let x=-3;x<=3.01;x+=.75){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,.775,-.12),new THREE.Vector3(x,.775,2.85)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
  for(let z=.0;z<=2.851;z+=.5){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,.775,z),new THREE.Vector3(3,.775,z)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
- const hemi=new THREE.HemisphereLight(0xeaf4fa,0x41474a,.7);scene.add(hemi);
- const key=new THREE.DirectionalLight(0xfff5e8,2.1);key.position.set(-2.5,-2,4);key.castShadow=true;key.shadow.mapSize.set(1536,1536);key.shadow.camera.left=-2;key.shadow.camera.right=2;key.shadow.camera.top=2;key.shadow.camera.bottom=-2;key.shadow.bias=-.00015;scene.add(key);
- const fill=new THREE.DirectionalLight(0xc7e2f5,1.1);fill.position.set(2,1.5,2.8);scene.add(fill);
- const rim=new THREE.DirectionalLight(0xffffff,1.35);rim.position.set(0,3,2.2);scene.add(rim);
+ const hemi=new THREE.HemisphereLight(0xeaf4fa,0x303438,.42);scene.add(hemi);
+ const key=new THREE.DirectionalLight(0xfff5e8,1.45);key.position.set(-2.5,-2,4);key.castShadow=true;key.shadow.mapSize.set(1536,1536);key.shadow.camera.left=-2;key.shadow.camera.right=2;key.shadow.camera.top=2;key.shadow.camera.bottom=-2;key.shadow.bias=-.00015;scene.add(key);
+ const fill=new THREE.DirectionalLight(0xc7e2f5,.62);fill.position.set(2,1.5,2.8);scene.add(fill);
+ const rim=new THREE.DirectionalLight(0xffffff,.85);rim.position.set(0,3,2.2);scene.add(rim);
  const L=2.4,W=.8,D=.05,corners=[[-L/2,-W/2,0],[L/2,-W/2,0],[L/2,W/2,0],[-L/2,W/2,0]],center=[0,0,-D];
- const product=new THREE.Group();scene.add(product);
+ const product=new THREE.Group();product.position.z=-.05;scene.add(product);
  // Fine directional brushing texture on the steel.
  const texCanvas=document.createElement('canvas');texCanvas.width=1024;texCanvas.height=512;const tc=texCanvas.getContext('2d');tc.fillStyle='rgb(205,205,205)';tc.fillRect(0,0,1024,512);
  // Directional, fine-grain satin brushing, repeated consistently rather than random noise.
  for(let y=0;y<512;y++){const v=196+Math.round(15*Math.sin(y*.71)+7*Math.sin(y*2.31));tc.fillStyle='rgb('+v+','+v+','+v+')';tc.fillRect(0,y,1024,1)}
  for(let i=0;i<1600;i++){const y=(i*137)%512;tc.fillStyle='rgba(70,70,70,.20)';tc.fillRect((i*71)%1024,y,25+(i%19)*12,1)}
  const brush=new THREE.CanvasTexture(texCanvas);brush.wrapS=brush.wrapT=THREE.RepeatWrapping;brush.repeat.set(2.4,1.5);brush.colorSpace=THREE.NoColorSpace;brush.anisotropy=renderer.capabilities.getMaxAnisotropy();
- const steel=new THREE.MeshPhysicalMaterial({color:0xb2bdc2,metalness:.98,roughness:.26,roughnessMap:brush,bumpMap:brush,bumpScale:.00018,envMapIntensity:3.2,anisotropy:.7,anisotropyRotation:0,clearcoat:.12,clearcoatRoughness:.22,side:THREE.DoubleSide});
+ const steel=new THREE.MeshPhysicalMaterial({color:0x87949a,metalness:.94,roughness:.34,roughnessMap:brush,bumpMap:brush,bumpScale:.00012,envMapIntensity:1.65,anisotropy:.55,anisotropyRotation:0,clearcoat:.08,clearcoatRoughness:.3,side:THREE.DoubleSide});
  for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4],g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...center],3));g.setAttribute('uv',new THREE.Float32BufferAttribute([a[0]/L+.5,a[1]/W+.5,b[0]/L+.5,b[1]/W+.5,.5,.5],2));g.computeVertexNormals();const face=new THREE.Mesh(g,steel);face.castShadow=true;face.receiveShadow=true;product.add(face)}
  const edgeMat=new THREE.MeshStandardMaterial({color:0xe0e6e8,metalness:.95,roughness:.2,envMapIntensity:1.4});
  for(let i=0;i<4;i++){const curve=new THREE.LineCurve3(new THREE.Vector3(...corners[i]),new THREE.Vector3(...corners[(i+1)%4]));const edge=new THREE.Mesh(new THREE.TubeGeometry(curve,1,.006,6,false),edgeMat);product.add(edge)}
@@ -75,12 +75,12 @@ try{
  // Thin dark underside gives the sheet a visible finished edge.
  const sideMat=new THREE.MeshStandardMaterial({color:0x59656b,metalness:.85,roughness:.29,side:THREE.DoubleSide});
  for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4],a2=[a[0],a[1],-.018],b2=[b[0],b[1],-.018],g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...b2,...a,...b2,...a2],3));g.computeVertexNormals();product.add(new THREE.Mesh(g,sideMat))}
- const dims=new THREE.Group();scene.add(dims);const lineMat=new THREE.LineBasicMaterial({color:0xf2f5f6});
+ const dims=new THREE.Group();dims.position.z=-.05;scene.add(dims);const lineMat=new THREE.LineBasicMaterial({color:0xf2f5f6});
  function seg(a,b){dims.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a),new THREE.Vector3(...b)]),lineMat))}
- function tag(str,pos){const c=document.createElement('canvas');c.width=256;c.height=64;const x=c.getContext('2d');x.font='bold 30px system-ui';x.textAlign='center';x.fillStyle='#f7fafb';x.shadowColor='#11191f';x.shadowBlur=5;x.fillText(str,128,43);const t=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false}));s.position.set(...pos);s.scale.set(.48,.12,1);dims.add(s)}
+ function tag(str,pos){const c=document.createElement('canvas');c.width=256;c.height=64;const x=c.getContext('2d');x.font='bold 30px system-ui';x.textAlign='center';x.lineWidth=5;x.strokeStyle='rgba(12,18,22,.9)';x.strokeText(str,128,43);x.fillStyle='#ffffff';x.shadowColor='#11191f';x.shadowBlur=4;x.fillText(str,128,43);const t=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false}));s.position.set(...pos);s.scale.set(.48,.12,1);dims.add(s)}
  seg([-1.2,-.55,.018],[1.2,-.55,.018]);tag('240 cm',[0,-.65,.035]);seg([1.32,-.4,.018],[1.32,.4,.018]);tag('80 cm',[1.42,0,.03]);seg([0,0,-.05],[.16,0,-.05]);tag('−5 cm',[.25,.02,-.05]);tag('Scarico Ø 10 cm',[0,.14,-.04]);
  const gridToggle=()=>{dims.visible=!dims.visible;document.getElementById('dims').textContent='Quote: '+(dims.visible?'ON':'OFF')};document.getElementById('dims').onclick=gridToggle;
- function initial(){camera.position.set(2.9,-2.9,2.45);controls.target.set(0,0,-.015);controls.update()}initial();
+ function initial(){camera.position.set(2.65,-2.65,2.2);controls.target.set(0,0,-.015);controls.update()}initial();
  document.getElementById('reset').onclick=initial;document.getElementById('top').onclick=()=>{camera.position.set(0,-.01,4.4);controls.target.set(0,0,-.02);controls.update()};
  function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}window.addEventListener('resize',resize);resize();
  renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera)});
