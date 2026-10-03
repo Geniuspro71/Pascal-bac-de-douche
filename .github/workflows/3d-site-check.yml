@@ -24,10 +24,13 @@ jobs:
       - name: Verify current interface controls
         run: |
           set -eu
-          grep -q 'content="three-screen-2d-20261003"' index.html
+          grep -q 'content="project-wizard-4step-20261003-r1"' index.html
           grep -q 'id="screen1"' index.html
           grep -q 'id="screen2"' index.html
           grep -q 'id="screen3"' index.html
+          grep -q 'id="screen4"' index.html
+          grep -q 'id="toDocuments"' index.html
+          grep -q 'id="exportDocs"' index.html
           grep -q 'id="projectName"' index.html
           grep -q 'id="clientName"' index.html
           grep -q 'id="planSvg"' index.html
@@ -63,7 +66,7 @@ jobs:
         run: |
           for i in $(seq 1 18); do
             code=$(curl -L -s -o /tmp/site.html -w "%{http_code}" "https://geniuspro71.github.io/Pascal-bac-de-douche/?check=${GITHUB_SHA}")
-            if [ "$code" = "200" ] && grep -q "content=\"three-screen-2d-20261003\"" /tmp/site.html && grep -q "id=\"screen1\"" /tmp/site.html && grep -q "id=\"screen2\"" /tmp/site.html && grep -q "id=\"screen3\"" /tmp/site.html && grep -q "id=\"projectName\"" /tmp/site.html && grep -q "id=\"clientName\"" /tmp/site.html && grep -q "id=\"planSvg\"" /tmp/site.html && grep -q "id=\"addOpening\"" /tmp/site.html && grep -q "function drawPlan" /tmp/site.html && grep -q "function updateRoomGeometry" /tmp/site.html; then
+            if [ "$code" = "200" ] && grep -q "content=\"project-wizard-4step-20261003-r1\"" /tmp/site.html && grep -q "id=\"screen1\"" /tmp/site.html && grep -q "id=\"screen2\"" /tmp/site.html && grep -q "id=\"screen3\"" /tmp/site.html && grep -q "id=\"projectName\"" /tmp/site.html && grep -q "id=\"clientName\"" /tmp/site.html && grep -q "id=\"planSvg\"" /tmp/site.html && grep -q "id=\"addOpening\"" /tmp/site.html && grep -q "function drawPlan" /tmp/site.html && grep -q "function updateRoomGeometry" /tmp/site.html; then
               echo "GitHub Pages risponde HTTP 200"
               exit 0
             fi
@@ -83,9 +86,9 @@ jobs:
             const errors = [];
             page.on('pageerror', e => errors.push(e.message));
             page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-            await page.goto('https://geniuspro71.github.io/Pascal-bac-de-douche/?check=three-screen-2d-20261003-' + Date.now(), {waitUntil:'networkidle',timeout:90000});
+            await page.goto('https://geniuspro71.github.io/Pascal-bac-de-douche/?check=project-wizard-4step-20261003-r1-' + Date.now(), {waitUntil:'networkidle',timeout:90000});
             const appVersion = await page.locator('meta[name="app-version"]').getAttribute('content');
-            if (appVersion !== 'three-screen-2d-20261003') throw new Error('GitHub Pages serve una versione non aggiornata: '+appVersion);
+            if (appVersion !== 'project-wizard-4step-20261003-r1') throw new Error('GitHub Pages serve una versione non aggiornata: '+appVersion);
             const noScroll = async () => {
               const v = await page.evaluate(() => ({w:document.documentElement.scrollWidth,h:document.documentElement.scrollHeight,iw:innerWidth,ih:innerHeight}));
               if(v.w>v.iw+1 || v.h>v.ih+1) throw new Error('Scroll non previsto: '+JSON.stringify(v));
@@ -116,7 +119,11 @@ jobs:
             await page.locator('#command').fill('Carrara sul pavimento');
             await page.locator('#sendCommand').click();
             if((await page.locator('#error').textContent()).trim()) throw new Error('Comando materiale segnalato come errore: '+await page.locator('#error').textContent());
-            if(await page.locator('.actions').count()) throw new Error('Toolbar vista non rimossa');
+            if(await page.locator('.actions button').count()) throw new Error('Vecchi pulsanti vista ancora presenti');
+            await page.locator('#toDocuments').click();
+            if (!(await page.locator('#screen4').evaluate(el=>el.classList.contains('active')))) throw new Error('Schermata documenti non attiva');
+            await page.locator('#backResult').click();
+            if (!(await page.locator('#screen3').evaluate(el=>el.classList.contains('active')))) throw new Error('Ritorno al risultato non riuscito');
             await noScroll();
             await page.screenshot({path:'3d-site-check.png',fullPage:true});
             if(errors.length) throw new Error('Errori browser: '+errors.join(' | '));
