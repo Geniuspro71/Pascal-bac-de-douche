@@ -80,16 +80,15 @@ jobs:
             await page.locator('#command').fill('Carraré sul pavimento');
             await page.locator('#sendCommand').click();
             if ((await page.locator('#error').textContent()).trim()) throw new Error('Comando materiale segnalato come errore: '+await page.locator('#error').textContent());
-            await page.getByRole('button', {name:'Isometrica'}).click();
-            await page.getByRole('button', {name:/Quote ON/}).click();
-            await page.getByRole('button', {name:'Dall’alto'}).click();
-            await page.getByRole('button', {name:'Laterale'}).click();
-            await page.getByRole('button', {name:'Scarico'}).click();
-            await page.getByRole('button', {name:/Acrilico satinato/}).click();
+            for (const id of ['#reset','#top','#side','#drainView']) {
+              if (await page.locator(id).count() !== 0) throw new Error('Pulsante di cambio vista ancora presente: '+id);
+            }
+            await page.locator('#dims').click();
+            await page.locator('#steel').click();
             await page.getByRole('button', {name:/Luci ON/}).click();
             await page.screenshot({path:'3d-site-check.png',fullPage:true});
             if (errors.length) throw new Error('Errori browser: '+errors.join(' | '));
-            console.log('PASS: canvas 3D caricato; viste isometrica e dall’alto e quote attivate; nessun errore browser.');
+            console.log('PASS: canvas 3D caricato in vista unica; vecchi pulsanti di cambio vista rimossi; formulario, materiali e controlli essenziali verificati; nessun errore browser.');
             console.log('Canvas:',JSON.stringify(canvas));
             await browser.close();
           })().catch(e => { console.error(e); process.exit(1); });
