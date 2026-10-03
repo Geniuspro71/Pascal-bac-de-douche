@@ -28,7 +28,9 @@ try{
  const envCanvas=document.createElement('canvas');envCanvas.width=1024;envCanvas.height=512;const ec=envCanvas.getContext('2d');
  const eg=ec.createLinearGradient(0,0,0,512);eg.addColorStop(0,'#202a31');eg.addColorStop(.38,'#9aa6ac');eg.addColorStop(.55,'#343e44');eg.addColorStop(1,'#151c21');ec.fillStyle=eg;ec.fillRect(0,0,1024,512);
  [[70,0,115,512,'#e6edf0'],[230,0,290,512,'#39464e'],[390,0,475,512,'#f3f5f4'],[590,0,660,512,'#5c6970'],[760,0,865,512,'#e5e9e9'],[945,0,1000,512,'#4d5a61']].forEach(([x,y,w,h,c])=>{const g=ec.createLinearGradient(x,0,x+w,0);g.addColorStop(0,'#11191f');g.addColorStop(.35,c);g.addColorStop(.7,c);g.addColorStop(1,'#182127');ec.fillStyle=g;ec.fillRect(x,y,w,h)});
- const envTex=new THREE.CanvasTexture(envCanvas);envTex.mapping=THREE.EquirectangularReflectionMapping;envTex.colorSpace=THREE.SRGBColorSpace;scene.environment=envTex;
+ const envTex=new THREE.CanvasTexture(envCanvas);envTex.mapping=THREE.EquirectangularReflectionMapping;envTex.colorSpace=THREE.SRGBColorSpace;
+ // Convert the studio panorama to a filtered environment map for stable metal reflections.
+ const pmrem=new THREE.PMREMGenerator(renderer);pmrem.compileEquirectangularShader();const envRT=pmrem.fromEquirectangular(envTex);scene.environment=envRT.texture;envTex.dispose();pmrem.dispose();
  // Bathroom floor and tiled wall for context.
  const floorMat=new THREE.MeshStandardMaterial({color:0x777b7b,roughness:.82,metalness:.03});
  const floor=new THREE.Mesh(new THREE.PlaneGeometry(6,5),floorMat);floor.position.set(0,0,-.125);floor.receiveShadow=true;scene.add(floor);
@@ -39,16 +41,18 @@ try{
  const wall=new THREE.Mesh(new THREE.PlaneGeometry(6,3),wallMat);wall.rotation.x=Math.PI/2;wall.position.set(0,.78,1.35);wall.receiveShadow=true;scene.add(wall);
  for(let x=-3;x<=3.01;x+=.75){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,.775,-.12),new THREE.Vector3(x,.775,2.85)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
  for(let z=.0;z<=2.851;z+=.5){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,.775,z),new THREE.Vector3(3,.775,z)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
- const hemi=new THREE.HemisphereLight(0xeaf4fa,0x41474a,1.45);scene.add(hemi);
- const key=new THREE.DirectionalLight(0xfff5e8,3.2);key.position.set(-2.5,-2,4);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.camera.left=-2;key.shadow.camera.right=2;key.shadow.camera.top=2;key.shadow.camera.bottom=-2;scene.add(key);
- const fill=new THREE.DirectionalLight(0xc7e2f5,2.2);fill.position.set(2,1.5,2.8);scene.add(fill);
+ const hemi=new THREE.HemisphereLight(0xeaf4fa,0x41474a,.7);scene.add(hemi);
+ const key=new THREE.DirectionalLight(0xfff5e8,2.1);key.position.set(-2.5,-2,4);key.castShadow=true;key.shadow.mapSize.set(1536,1536);key.shadow.camera.left=-2;key.shadow.camera.right=2;key.shadow.camera.top=2;key.shadow.camera.bottom=-2;key.shadow.bias=-.00015;scene.add(key);
+ const fill=new THREE.DirectionalLight(0xc7e2f5,1.1);fill.position.set(2,1.5,2.8);scene.add(fill);
+ const rim=new THREE.DirectionalLight(0xffffff,1.35);rim.position.set(0,3,2.2);scene.add(rim);
  const L=2.4,W=.8,D=.05,corners=[[-L/2,-W/2,0],[L/2,-W/2,0],[L/2,W/2,0],[-L/2,W/2,0]],center=[0,0,-D];
  const product=new THREE.Group();scene.add(product);
  // Fine directional brushing texture on the steel.
- const texCanvas=document.createElement('canvas');texCanvas.width=512;texCanvas.height=512;const tc=texCanvas.getContext('2d');tc.fillStyle='#b8c1c5';tc.fillRect(0,0,512,512);
- for(let i=0;i<36000;i++){const y=Math.random()*512,x=Math.random()*512;tc.fillStyle=Math.random()>.5?'rgba(255,255,255,.07)':'rgba(30,43,50,.045)';tc.fillRect(x,y,Math.random()*22+.5,.45)}
- const brush=new THREE.CanvasTexture(texCanvas);brush.wrapS=brush.wrapT=THREE.RepeatWrapping;brush.repeat.set(2,1);brush.colorSpace=THREE.SRGBColorSpace;
- const steel=new THREE.MeshPhysicalMaterial({color:0xc4cdd1,metalness:.92,roughness:.24,envMapIntensity:1.55,clearcoat:.32,clearcoatRoughness:.2,side:THREE.DoubleSide,map:brush});
+ const texCanvas=document.createElement('canvas');texCanvas.width=1024;texCanvas.height=512;const tc=texCanvas.getContext('2d');tc.fillStyle='rgb(132,132,132)';tc.fillRect(0,0,1024,512);
+ // Very fine, predominantly linear abrasion, typical of brushed stainless steel.
+ for(let i=0;i<18000;i++){const y=Math.random()*512,x=Math.random()*1024,v=105+Math.floor(Math.random()*65);tc.fillStyle='rgb('+v+','+v+','+v+')';tc.fillRect(x,y,8+Math.random()*100,.25+Math.random()*.45)}
+ const brush=new THREE.CanvasTexture(texCanvas);brush.wrapS=brush.wrapT=THREE.RepeatWrapping;brush.repeat.set(2,1);brush.colorSpace=THREE.NoColorSpace;brush.anisotropy=renderer.capabilities.getMaxAnisotropy();
+ const steel=new THREE.MeshPhysicalMaterial({color:0x9ca8ae,metalness:1,roughness:.29,roughnessMap:brush,envMapIntensity:2.35,clearcoat:.18,clearcoatRoughness:.28,side:THREE.DoubleSide});
  for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4],g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...center],3));g.computeVertexNormals();const face=new THREE.Mesh(g,steel);face.castShadow=true;face.receiveShadow=true;product.add(face)}
  const edgeMat=new THREE.MeshStandardMaterial({color:0xe0e6e8,metalness:.95,roughness:.2,envMapIntensity:1.4});
  for(let i=0;i<4;i++){const curve=new THREE.LineCurve3(new THREE.Vector3(...corners[i]),new THREE.Vector3(...corners[(i+1)%4]));const edge=new THREE.Mesh(new THREE.TubeGeometry(curve,1,.006,6,false),edgeMat);product.add(edge)}
