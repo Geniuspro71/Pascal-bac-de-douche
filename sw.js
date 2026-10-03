@@ -1,0 +1,6 @@
+const CACHE='pascal-bac-v1';
+const ROOT=new URL('./',self.location.href);
+const SHELL=new URL('./',ROOT).href;
+self.addEventListener('install',event=>event.waitUntil((async()=>{const c=await caches.open(CACHE);try{await c.add(SHELL)}catch(e){}await self.skipWaiting()})()));
+self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const k of await caches.keys())if(k.startsWith('pascal-bac-')&&k!==CACHE)await caches.delete(k);await self.clients.claim()})()));
+self.addEventListener('fetch',event=>{const r=event.request;if(r.method!=='GET')return;const u=new URL(r.url);if(u.origin!==self.location.origin&&u.hostname!=='cdn.jsdelivr.net')return;event.respondWith((async()=>{const c=await caches.open(CACHE);const cached=await c.match(r);if(cached)return cached;try{const response=await fetch(r);if(response&&(response.ok||response.type==='opaque')){try{await c.put(r,response.clone())}catch(e){}}return response}catch(e){if(r.mode==='navigate'){const fallback=await c.match(SHELL);if(fallback)return fallback}throw e}})())});
