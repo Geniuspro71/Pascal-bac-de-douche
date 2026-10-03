@@ -56,7 +56,7 @@ jobs:
         run: |
           for i in $(seq 1 18); do
             code=$(curl -L -s -o /tmp/site.html -w "%{http_code}" "https://geniuspro71.github.io/Pascal-bac-de-douche/?check=${GITHUB_SHA}")
-            if [ "$code" = "200" ] && grep -q "content=\"three-screen-2d-20261003\"" /tmp/site.html && grep -q "Piatto doccia · acrilico" /tmp/site.html && grep -q "scarico rettangolare 10 × 10 cm" /tmp/site.html && grep -q "Dimensioni stanza" /tmp/site.html && grep -q "function updateRoomGeometry" /tmp/site.html && grep -q "Quote ON" /tmp/site.html; then
+            if [ "$code" = "200" ] && grep -q "content=\"three-screen-2d-20261003\"" /tmp/site.html && grep -q "id=\"screen1\"" /tmp/site.html && grep -q "id=\"screen2\"" /tmp/site.html && grep -q "id=\"screen3\"" /tmp/site.html && grep -q "id=\"projectName\"" /tmp/site.html && grep -q "id=\"clientName\"" /tmp/site.html && grep -q "id=\"planSvg\"" /tmp/site.html && grep -q "id=\"addOpening\"" /tmp/site.html && grep -q "function drawPlan" /tmp/site.html && grep -q "function updateRoomGeometry" /tmp/site.html; then
               echo "GitHub Pages risponde HTTP 200"
               exit 0
             fi
