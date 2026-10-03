@@ -1,0 +1,11 @@
+{
+  "name":"Pascal - Progettista ambiente",
+  "short_name":"Pascal",
+  "description":"Progettazione di ambienti, disegno 2D e visualizzazione 3D",
+  "start_url":"./",
+  "scope":"./",
+  "display":"standalone",
+  "background_color":"#11181d",
+  "theme_color":"#11181d",
+  "icons":[{"src":"./app-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]
+}
