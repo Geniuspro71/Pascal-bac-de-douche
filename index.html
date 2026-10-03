@@ -66,16 +66,30 @@ try{
  for(let i=0;i<1600;i++){const y=(i*137)%512;tc.fillStyle='rgba(70,70,70,.20)';tc.fillRect((i*71)%1024,y,25+(i%19)*12,1)}
  const brush=new THREE.CanvasTexture(texCanvas);brush.wrapS=brush.wrapT=THREE.RepeatWrapping;brush.repeat.set(2.4,1.5);brush.colorSpace=THREE.NoColorSpace;brush.anisotropy=renderer.capabilities.getMaxAnisotropy();
  const steel=new THREE.MeshPhysicalMaterial({color:0x82939b,metalness:.88,roughness:.31,roughnessMap:brush,bumpMap:brush,bumpScale:.00016,envMapIntensity:1.65,anisotropy:.65,anisotropyRotation:0,clearcoat:.04,clearcoatRoughness:.38,side:THREE.DoubleSide});
- for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4],g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...center],3));g.setAttribute('uv',new THREE.Float32BufferAttribute([a[0]/L+.5,a[1]/W+.5,b[0]/L+.5,b[1]/W+.5,.5,.5],2));g.computeVertexNormals();const face=new THREE.Mesh(g,steel);face.castShadow=true;face.receiveShadow=true;product.add(face)}
+ // Quattro falde triangolari con apertura circolare reale: la lamiera non copre lo scarico.
+ for(let i=0;i<4;i++){
+   const a=corners[i],b=corners[(i+1)%4],ax=a[0],ay=a[1],bx=b[0],by=b[1],ex=bx-ax,ey=by-ay;
+   const start=Math.atan2(ay,ax),end=Math.atan2(by,bx),sweep=((end-start)%(Math.PI*2)+Math.PI*2)%(Math.PI*2),segments=48;
+   const positions=[],uvs=[],indices=[];
+   for(let j=0;j<=segments;j++){
+     const theta=start+sweep*j/segments,dx=Math.cos(theta),dy=Math.sin(theta),den=dx*ey-dy*ex;
+     const t=(ax*ey-ay*ex)/den,r=.05,z=-D*(1-r/t);
+     positions.push(dx*r,dy*r,z,dx*t,dy*t,0);
+     uvs.push(dx*r/L+.5,dy*r/W+.5,dx*t/L+.5,dy*t/W+.5);
+   }
+   for(let j=0;j<segments;j++){const k=j*2;indices.push(k,k+1,k+2,k+1,k+3,k+2)}
+   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));g.setIndex(indices);g.computeVertexNormals();
+   const face=new THREE.Mesh(g,steel);face.castShadow=true;face.receiveShadow=true;product.add(face);
+ }
  const edgeMat=new THREE.MeshStandardMaterial({color:0xaab5ba,metalness:.9,roughness:.27,envMapIntensity:1.2});
  for(let i=0;i<4;i++){const curve=new THREE.LineCurve3(new THREE.Vector3(...corners[i]),new THREE.Vector3(...corners[(i+1)%4]));const edge=new THREE.Mesh(new THREE.TubeGeometry(curve,1,.006,6,false),edgeMat);product.add(edge)}
  // Delicate facet junctions define the four sloped triangular planes.
  const seamMat=new THREE.MeshStandardMaterial({color:0x65747b,metalness:.78,roughness:.4,transparent:true,opacity:.62});
  for(const p of corners){const path=new THREE.LineCurve3(new THREE.Vector3(...p),new THREE.Vector3(0,0,-D));product.add(new THREE.Mesh(new THREE.TubeGeometry(path,12,.0018,5,false),seamMat));}
- // Scarico circolare: apertura Ø 10 cm, con bordo metallico concentrico ben leggibile.
- const drain=new THREE.Mesh(new THREE.CircleGeometry(.05,128),new THREE.MeshStandardMaterial({color:0x101518,metalness:.35,roughness:.26,side:THREE.DoubleSide}));drain.position.set(0,0,-D+.0025);product.add(drain);
- const collar=new THREE.Mesh(new THREE.RingGeometry(.0505,.060,128),new THREE.MeshPhysicalMaterial({color:0xaebbc1,metalness:.98,roughness:.2,envMapIntensity:2.0,side:THREE.DoubleSide}));collar.position.set(0,0,-D+.004);product.add(collar);
- const innerLip=new THREE.Mesh(new THREE.RingGeometry(.046,.048,128),new THREE.MeshStandardMaterial({color:0x4d5a60,metalness:.9,roughness:.24,side:THREE.DoubleSide}));innerLip.position.set(0,0,-D+.005);product.add(innerLip);
+ // Scarico circolare Ø 10 cm: parete interna scura e fondo incassato sotto la lamiera.
+ const drainWall=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.026,128,1,true),new THREE.MeshStandardMaterial({color:0x222a2e,metalness:.55,roughness:.3,side:THREE.DoubleSide}));drainWall.rotation.x=Math.PI/2;drainWall.position.set(0,0,-D-.012);product.add(drainWall);
+ const drain=new THREE.Mesh(new THREE.CircleGeometry(.048,128),new THREE.MeshStandardMaterial({color:0x080b0d,metalness:.25,roughness:.3,side:THREE.DoubleSide}));drain.position.set(0,0,-D-.026);product.add(drain);
+ const collar=new THREE.Mesh(new THREE.RingGeometry(.050,.060,128),new THREE.MeshPhysicalMaterial({color:0xaebbc1,metalness:.98,roughness:.2,envMapIntensity:2.0,side:THREE.DoubleSide}));collar.position.set(0,0,-D+.008);product.add(collar);
  // Thin dark underside gives the sheet a visible finished edge.
  const sideMat=new THREE.MeshStandardMaterial({color:0x59656b,metalness:.85,roughness:.29,side:THREE.DoubleSide});
  for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4],a2=[a[0],a[1],-.018],b2=[b[0],b[1],-.018],g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...b2,...a,...b2,...a2],3));g.computeVertexNormals();product.add(new THREE.Mesh(g,sideMat))}
