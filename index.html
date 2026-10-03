@@ -22,7 +22,7 @@ try{
  const scene=new THREE.Scene();scene.background=new THREE.Color(0x20272b);
  const camera=new THREE.PerspectiveCamera(36,1,.01,100);camera.up.set(0,0,1);
  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
- renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);
  const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.075;controls.minDistance=1.5;controls.maxDistance=8;controls.target.set(0,0,0);
  // Procedural studio environment: broad softboxes create readable reflections on metal.
  const envCanvas=document.createElement('canvas');envCanvas.width=1024;envCanvas.height=512;const ec=envCanvas.getContext('2d');
@@ -32,7 +32,7 @@ try{
  // Convert the studio panorama to a filtered environment map for stable metal reflections.
  const pmrem=new THREE.PMREMGenerator(renderer);pmrem.compileEquirectangularShader();const envRT=pmrem.fromEquirectangular(envTex);scene.environment=envRT.texture;envTex.dispose();pmrem.dispose();
  // Bathroom floor and tiled wall for context.
- const floorMat=new THREE.MeshStandardMaterial({color:0x777b7b,roughness:.82,metalness:.03});
+ const floorMat=new THREE.MeshStandardMaterial({color:0x555b5e,roughness:.88,metalness:.02});
  const floor=new THREE.Mesh(new THREE.PlaneGeometry(6,5),floorMat);floor.position.set(0,0,-.125);floor.receiveShadow=true;scene.add(floor);
  const grout=new THREE.LineBasicMaterial({color:0x4d5558,transparent:true,opacity:.65});
  for(let x=-3;x<=3.01;x+=.4){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,-2.5,-.122),new THREE.Vector3(x,2.5,-.122)]),grout);scene.add(l)}
@@ -48,12 +48,13 @@ try{
  const L=2.4,W=.8,D=.05,corners=[[-L/2,-W/2,0],[L/2,-W/2,0],[L/2,W/2,0],[-L/2,W/2,0]],center=[0,0,-D];
  const product=new THREE.Group();scene.add(product);
  // Fine directional brushing texture on the steel.
- const texCanvas=document.createElement('canvas');texCanvas.width=1024;texCanvas.height=512;const tc=texCanvas.getContext('2d');tc.fillStyle='rgb(132,132,132)';tc.fillRect(0,0,1024,512);
- // Very fine, predominantly linear abrasion, typical of brushed stainless steel.
- for(let i=0;i<18000;i++){const y=Math.random()*512,x=Math.random()*1024,v=105+Math.floor(Math.random()*65);tc.fillStyle='rgb('+v+','+v+','+v+')';tc.fillRect(x,y,8+Math.random()*100,.25+Math.random()*.45)}
- const brush=new THREE.CanvasTexture(texCanvas);brush.wrapS=brush.wrapT=THREE.RepeatWrapping;brush.repeat.set(2,1);brush.colorSpace=THREE.NoColorSpace;brush.anisotropy=renderer.capabilities.getMaxAnisotropy();
- const steel=new THREE.MeshPhysicalMaterial({color:0x9ca8ae,metalness:1,roughness:.29,roughnessMap:brush,envMapIntensity:2.35,clearcoat:.18,clearcoatRoughness:.28,side:THREE.DoubleSide});
- for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4],g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...center],3));g.computeVertexNormals();const face=new THREE.Mesh(g,steel);face.castShadow=true;face.receiveShadow=true;product.add(face)}
+ const texCanvas=document.createElement('canvas');texCanvas.width=1024;texCanvas.height=512;const tc=texCanvas.getContext('2d');tc.fillStyle='rgb(205,205,205)';tc.fillRect(0,0,1024,512);
+ // Directional, fine-grain satin brushing, repeated consistently rather than random noise.
+ for(let y=0;y<512;y++){const v=196+Math.round(15*Math.sin(y*.71)+7*Math.sin(y*2.31));tc.fillStyle='rgb('+v+','+v+','+v+')';tc.fillRect(0,y,1024,1)}
+ for(let i=0;i<1600;i++){const y=(i*137)%512;tc.fillStyle='rgba(70,70,70,.20)';tc.fillRect((i*71)%1024,y,25+(i%19)*12,1)}
+ const brush=new THREE.CanvasTexture(texCanvas);brush.wrapS=brush.wrapT=THREE.RepeatWrapping;brush.repeat.set(2.4,1.5);brush.colorSpace=THREE.NoColorSpace;brush.anisotropy=renderer.capabilities.getMaxAnisotropy();
+ const steel=new THREE.MeshPhysicalMaterial({color:0xb2bdc2,metalness:.98,roughness:.2,roughnessMap:brush,bumpMap:brush,bumpScale:.00035,envMapIntensity:2.8,clearcoat:.24,clearcoatRoughness:.18,side:THREE.DoubleSide});
+ for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4],g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...center],3));g.setAttribute('uv',new THREE.Float32BufferAttribute([a[0]/L+.5,a[1]/W+.5,b[0]/L+.5,b[1]/W+.5,.5,.5],2));g.computeVertexNormals();const face=new THREE.Mesh(g,steel);face.castShadow=true;face.receiveShadow=true;product.add(face)}
  const edgeMat=new THREE.MeshStandardMaterial({color:0xe0e6e8,metalness:.95,roughness:.2,envMapIntensity:1.4});
  for(let i=0;i<4;i++){const curve=new THREE.LineCurve3(new THREE.Vector3(...corners[i]),new THREE.Vector3(...corners[(i+1)%4]));const edge=new THREE.Mesh(new THREE.TubeGeometry(curve,1,.006,6,false),edgeMat);product.add(edge)}
  // Drain recess and brushed circular collar.
