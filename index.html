@@ -4,15 +4,15 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <title>Piatto doccia inox 240 × 80 cm</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#11181d;color:#f3f6f7;font:15px system-ui,-apple-system,sans-serif}#view{position:absolute;inset:0;touch-action:none}canvas{display:block;width:100%;height:100%;touch-action:none}.panel{position:absolute;top:12px;left:12px;padding:12px 14px;max-width:calc(100% - 24px);border:1px solid #ffffff25;border-radius:12px;background:#11191fdf;backdrop-filter:blur(12px);pointer-events:none}h1{font-size:16px;margin:0 0 5px;font-weight:650}.sub{font-size:12px;color:#c2cdd2;line-height:1.5}.actions{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:7px;max-width:calc(100% - 16px)}button{border:1px solid #ffffff45;border-radius:10px;background:#253640;color:#f5f8fa;padding:11px 12px;font-size:13px;white-space:nowrap}button:active{background:#405a67}#hint{position:absolute;bottom:67px;left:50%;transform:translateX(-50%);font-size:12px;color:#d0d9dd;background:#11191fdf;padding:7px 11px;border-radius:8px;white-space:nowrap;pointer-events:none}#error{display:none;position:absolute;left:12px;right:12px;top:100px;padding:12px;background:#452d25;color:#fff;border-radius:10px;font-size:13px}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#11181d;color:#f3f6f7;font:15px system-ui,-apple-system,sans-serif}#view{position:absolute;inset:0;touch-action:none}canvas{display:block;width:100%;height:100%;touch-action:none}.panel{position:absolute;top:12px;left:12px;padding:12px 14px;max-width:calc(100% - 24px);border:1px solid #ffffff25;border-radius:12px;background:#11191fdf;backdrop-filter:blur(12px);pointer-events:none}h1{font-size:16px;margin:0 0 5px;font-weight:650}.sub{font-size:12px;color:#c2cdd2;line-height:1.5}.actions{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:7px;width:calc(100% - 20px);max-width:760px;overflow-x:auto;padding:7px 2px 10px;scrollbar-width:none;justify-content:flex-start;touch-action:pan-x}.actions::-webkit-scrollbar{display:none}button{flex:0 0 auto;border:1px solid #ffffff32;border-radius:12px;background:#17232bdc;color:#f5f8fa;padding:11px 13px;font-size:12px;font-weight:600;white-space:nowrap;backdrop-filter:blur(14px);box-shadow:0 4px 18px #0003}button:active,button.active{background:#48616e;border-color:#b8d4df}#hint{position:absolute;bottom:72px;left:50%;transform:translateX(-50%);font-size:11px;color:#e1e8eb;background:#11191fdf;padding:7px 11px;border:1px solid #ffffff20;border-radius:9px;white-space:nowrap;pointer-events:none;backdrop-filter:blur(12px)}@media(max-width:520px){.panel{top:10px;left:10px;padding:10px 12px}.actions{bottom:10px}.actions button{padding:10px 11px;font-size:11px}#hint{bottom:65px;font-size:10px}}#error{display:none;position:absolute;left:12px;right:12px;top:100px;padding:12px;background:#452d25;color:#fff;border-radius:10px;font-size:13px}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head>
 <body>
 <div id="view"></div>
-<div class="panel"><h1>Piatto doccia in acciaio inox</h1><div class="sub">240 × 80 cm · ribasso centrale 5 cm · scarico Ø 10 cm<br>Modello 3D interattivo · inox satinato · 4 falde</div></div>
+<div class="panel"><h1>Piatto doccia · inox</h1><div class="sub">240 × 80 cm · ribasso 5 cm · scarico Ø 10 cm<br>Modello 3D · 4 falde inclinate</div></div>
 <div id="hint">Trascina per ruotare · pizzica per ingrandire</div>
-<div class="actions"><button id="reset">Vista iniziale</button><button id="dims">Quote: ON</button><button id="top">Vista dall’alto</button></div>
+<div class="actions"><button id="reset" class="active">Isometrica</button><button id="top">Dall’alto</button><button id="side">Laterale</button><button id="drainView">Scarico</button><button id="dims" class="active">Quote ON</button><button id="steel">Inox satinato</button><button id="light" class="active">Luci ON</button></div>
 <div id="error"></div>
 <script type="module">
 const host=document.getElementById('view'),err=document.getElementById('error');
@@ -23,7 +23,7 @@ try{
  const scene=new THREE.Scene();scene.background=new THREE.Color(0x20272b);
  const camera=new THREE.PerspectiveCamera(36,1,.01,100);camera.up.set(0,0,1);
  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
- renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.78;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);
  const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.075;controls.minDistance=1.5;controls.maxDistance=8;controls.target.set(0,0,0);
  // Physically based studio room environment with large reflection panels.
  const pmrem=new THREE.PMREMGenerator(renderer);pmrem.compileEquirectangularShader();
@@ -54,9 +54,9 @@ try{
  for(let x=-3;x<=3.01;x+=.75){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,.775,-.12),new THREE.Vector3(x,.775,2.85)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
  for(let z=.0;z<=2.851;z+=.5){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,.775,z),new THREE.Vector3(3,.775,z)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
  const hemi=new THREE.HemisphereLight(0xeaf4fa,0x303438,.32);scene.add(hemi);
- const key=new THREE.DirectionalLight(0xfff5e8,1.15);key.position.set(-2.5,-2,4);key.castShadow=true;key.shadow.mapSize.set(1536,1536);key.shadow.camera.left=-2;key.shadow.camera.right=2;key.shadow.camera.top=2;key.shadow.camera.bottom=-2;key.shadow.bias=-.00015;scene.add(key);
- const fill=new THREE.DirectionalLight(0xc7e2f5,.45);fill.position.set(2,1.5,2.8);scene.add(fill);
- const rim=new THREE.DirectionalLight(0xffffff,.65);rim.position.set(0,3,2.2);scene.add(rim);
+ const key=new THREE.DirectionalLight(0xfff5e8,1.45);key.position.set(-2.5,-2,4);key.castShadow=true;key.shadow.mapSize.set(1536,1536);key.shadow.camera.left=-2;key.shadow.camera.right=2;key.shadow.camera.top=2;key.shadow.camera.bottom=-2;key.shadow.bias=-.00015;scene.add(key);
+ const fill=new THREE.DirectionalLight(0xc7e2f5,.72);fill.position.set(2,1.5,2.8);scene.add(fill);
+ const rim=new THREE.DirectionalLight(0xffffff,.9);rim.position.set(0,3,2.2);scene.add(rim);
  const L=2.4,W=.8,D=.05,corners=[[-L/2,-W/2,0],[L/2,-W/2,0],[L/2,W/2,0],[-L/2,W/2,0]],center=[0,0,-D];
  const product=new THREE.Group();product.position.z=0;scene.add(product);
  // Fine directional brushing texture on the steel.
@@ -65,7 +65,7 @@ try{
  for(let y=0;y<512;y++){const v=196+Math.round(15*Math.sin(y*.71)+7*Math.sin(y*2.31));tc.fillStyle='rgb('+v+','+v+','+v+')';tc.fillRect(0,y,1024,1)}
  for(let i=0;i<1600;i++){const y=(i*137)%512;tc.fillStyle='rgba(70,70,70,.20)';tc.fillRect((i*71)%1024,y,25+(i%19)*12,1)}
  const brush=new THREE.CanvasTexture(texCanvas);brush.wrapS=brush.wrapT=THREE.RepeatWrapping;brush.repeat.set(2.4,1.5);brush.colorSpace=THREE.NoColorSpace;brush.anisotropy=renderer.capabilities.getMaxAnisotropy();
- const steel=new THREE.MeshPhysicalMaterial({color:0x64747c,metalness:.92,roughness:.43,roughnessMap:brush,bumpMap:brush,bumpScale:.00022,envMapIntensity:1.35,anisotropy:.65,anisotropyRotation:0,clearcoat:.04,clearcoatRoughness:.38,side:THREE.DoubleSide});
+ const steel=new THREE.MeshPhysicalMaterial({color:0x82939b,metalness:.88,roughness:.31,roughnessMap:brush,bumpMap:brush,bumpScale:.00016,envMapIntensity:1.65,anisotropy:.65,anisotropyRotation:0,clearcoat:.04,clearcoatRoughness:.38,side:THREE.DoubleSide});
  for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4],g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...center],3));g.setAttribute('uv',new THREE.Float32BufferAttribute([a[0]/L+.5,a[1]/W+.5,b[0]/L+.5,b[1]/W+.5,.5,.5],2));g.computeVertexNormals();const face=new THREE.Mesh(g,steel);face.castShadow=true;face.receiveShadow=true;product.add(face)}
  const edgeMat=new THREE.MeshStandardMaterial({color:0xaab5ba,metalness:.9,roughness:.27,envMapIntensity:1.2});
  for(let i=0;i<4;i++){const curve=new THREE.LineCurve3(new THREE.Vector3(...corners[i]),new THREE.Vector3(...corners[(i+1)%4]));const edge=new THREE.Mesh(new THREE.TubeGeometry(curve,1,.006,6,false),edgeMat);product.add(edge)}
@@ -82,9 +82,17 @@ try{
  function seg(a,b){dims.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a),new THREE.Vector3(...b)]),lineMat))}
  function tag(str,pos){const c=document.createElement('canvas');c.width=256;c.height=64;const x=c.getContext('2d');x.font='bold 30px system-ui';x.textAlign='center';x.lineWidth=5;x.strokeStyle='rgba(12,18,22,.9)';x.strokeText(str,128,43);x.fillStyle='#ffffff';x.shadowColor='#11191f';x.shadowBlur=4;x.fillText(str,128,43);const t=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false}));s.position.set(...pos);s.scale.set(.48,.12,1);dims.add(s)}
  seg([-1.2,-.55,.018],[1.2,-.55,.018]);tag('240 cm',[0,-.65,.035]);seg([1.32,-.4,.018],[1.32,.4,.018]);tag('80 cm',[1.42,0,.03]);seg([0,0,-.05],[.16,0,-.05]);tag('−5 cm',[.25,.02,-.05]);tag('Scarico Ø 10 cm',[0,.14,-.04]);
- const gridToggle=()=>{dims.visible=!dims.visible;document.getElementById('dims').textContent='Quote: '+(dims.visible?'ON':'OFF')};document.getElementById('dims').onclick=gridToggle;
- function initial(){camera.position.set(2.65,-2.65,2.2);controls.target.set(0,0,-.005);controls.update()}initial();
- document.getElementById('reset').onclick=initial;document.getElementById('top').onclick=()=>{camera.position.set(0,-.01,4.4);controls.target.set(0,0,-.02);controls.update()};
+ const dimsBtn=document.getElementById('dims'),steelBtn=document.getElementById('steel'),lightBtn=document.getElementById('light');
+ const gridToggle=()=>{dims.visible=!dims.visible;dimsBtn.textContent='Quote '+(dims.visible?'ON':'OFF');dimsBtn.classList.toggle('active',dims.visible)};dimsBtn.onclick=gridToggle;
+ let polished=false,lightsOn=true;const baseLight=[1.45,.72,.9];
+ steelBtn.onclick=()=>{polished=!polished;steel.roughness=polished ? .17 : .31;steel.clearcoat=polished ? .32 : .04;steel.clearcoatRoughness=polished ? .12 : .38;steel.envMapIntensity=polished ? 2.15 : 1.65;steel.needsUpdate=true;steelBtn.textContent=polished?'Inox lucido':'Inox satinato';steelBtn.classList.toggle('active',!polished)};
+ lightBtn.onclick=()=>{lightsOn=!lightsOn;key.intensity=lightsOn?baseLight[0]:.12;fill.intensity=lightsOn?baseLight[1]:.05;rim.intensity=lightsOn?baseLight[2]:.08;hemi.intensity=lightsOn?.32:.12;lightBtn.textContent='Luci '+(lightsOn?'ON':'soft');lightBtn.classList.toggle('active',lightsOn)};
+ function aim(pos,target=[0,0,-.015]){camera.position.set(...pos);controls.target.set(...target);controls.update()}
+ function initial(){aim([2.3,-2.3,3.25]);document.getElementById('reset').classList.add('active')}
+ initial();document.getElementById('reset').onclick=initial;
+ document.getElementById('top').onclick=()=>aim([0,-.01,4.4],[0,0,-.02]);
+ document.getElementById('side').onclick=()=>aim([0,-3.7,1.25],[0,0,-.02]);
+ document.getElementById('drainView').onclick=()=>aim([.9,-1.05,1.1],[0,0,-.05]);
  function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}window.addEventListener('resize',resize);resize();
  renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera)});
 }catch(e){console.error(e);err.style.display='block';err.textContent='Avvio 3D non riuscito: '+(e&&e.message?e.message:'browser non compatibile')+'. Prova ad aprire il link direttamente in Safari.'}
