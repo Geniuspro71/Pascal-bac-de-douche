@@ -48,13 +48,34 @@ try{
  const floorMarble=marbleTexture(7821),wallMarble=marbleTexture(1427);
  const floorMat=new THREE.MeshStandardMaterial({map:floorMarble,bumpMap:floorMarble,bumpScale:.001,color:0xbab9b3,roughness:.58,metalness:0});
  const floor=new THREE.Mesh(new THREE.PlaneGeometry(6,5),floorMat);floor.position.set(0,0,-.085);floor.receiveShadow=true;scene.add(floor);
- const grout=new THREE.LineBasicMaterial({color:0x777b7b,transparent:true,opacity:.5});
- for(let x=-3;x<=3.01;x+=.8){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,-2.5,-.082),new THREE.Vector3(x,2.5,-.082)]),grout);scene.add(l)}
- for(let y=-2.5;y<=2.51;y+=.8){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,y,-.082),new THREE.Vector3(3,y,-.082)]),grout);scene.add(l)}
  const wallMat=new THREE.MeshStandardMaterial({map:wallMarble,bumpMap:wallMarble,bumpScale:.0012,color:0xd0ceca,roughness:.48,metalness:0});
- const wall=new THREE.Mesh(new THREE.PlaneGeometry(6,3),wallMat);wall.rotation.x=Math.PI/2;wall.position.set(0,.78,1.35);wall.receiveShadow=true;scene.add(wall);
- function applyRoomDimensions(){const wi=document.getElementById('roomW'),di=document.getElementById('roomD'),hi=document.getElementById('roomH'),width=Number(wi.value),depth=Number(di.value),height=Number(hi.value),status=document.getElementById('roomStatus');if(!wi.value.trim()||!di.value.trim()||!hi.value.trim()||!Number.isFinite(width)||!Number.isFinite(depth)||!Number.isFinite(height)||width<=0||depth<=0||height<=0){status.textContent='Inserisci tre misure positive e finite, senza un limite massimo prefissato.';return false}floor.scale.set(width/6,depth/5,1);wall.scale.set(width/6,height/3,1);wall.position.set(0,depth/2,height/2);const fit=Math.max(width,depth,height,3.2)/3.2;camera.position.set(2.65*fit,-2.65*fit,2.2*fit);camera.far=Math.max(100,fit*30);camera.updateProjectionMatrix();controls.target.set(0,0,-.015);controls.maxDistance=Math.max(8,Math.max(width,depth,height)*3);controls.update();status.textContent=`Dimensioni applicate: ${width.toLocaleString('it-IT',{maximumFractionDigits:2})} × ${depth.toLocaleString('it-IT',{maximumFractionDigits:2})} × ${height.toLocaleString('it-IT',{maximumFractionDigits:2})} m`;err.style.display='none';return true}
-document.getElementById('roomTools').addEventListener('submit',event=>{event.preventDefault();applyRoomDimensions()});applyRoomDimensions();
+ const roomWalls=new THREE.Group();scene.add(roomWalls);
+ const floorGrid=new THREE.Group(),wallGrid=new THREE.Group();scene.add(floorGrid,wallGrid);
+ const grout=new THREE.LineBasicMaterial({color:0x777b7b,transparent:true,opacity:.5});
+ const wallGrout=new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45});
+ function clearGroup(group){while(group.children.length){const child=group.children.pop();if(child.geometry)child.geometry.dispose();if(child.parent)child.parent.remove(child)}}
+ function addGridSegments(group,coords,material){if(!coords.length)return;const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(coords,3));group.add(new THREE.LineSegments(geometry,material))}
+ function updateRoomGeometry(width,depth,height){
+   floor.scale.set(width/6,depth/5,1);
+   clearGroup(roomWalls);clearGroup(floorGrid);clearGroup(wallGrid);
+   const rear=new THREE.Mesh(new THREE.PlaneGeometry(width,height),wallMat);rear.rotation.x=Math.PI/2;rear.position.set(0,depth/2,height/2);rear.receiveShadow=true;roomWalls.add(rear);
+   function sideWall(x,flip){const verts=flip?[x,depth/2,0,x,-depth/2,0,x,-depth/2,height,x,depth/2,height]:[x,-depth/2,0,x,depth/2,0,x,depth/2,height,x,-depth/2,height];const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setAttribute('uv',new THREE.Float32BufferAttribute([0,0,1,0,1,1,0,1],2));g.setIndex([0,1,2,0,2,3]);g.computeVertexNormals();const m=new THREE.Mesh(g,wallMat);m.receiveShadow=true;roomWalls.add(m)}
+   sideWall(-width/2,false);sideWall(width/2,true);
+   const maxDim=Math.max(width,depth,height),step=Math.max(.5,Math.ceil(maxDim/50*2)/2),fg=[],wg=[];
+   for(let x=-width/2;x<=width/2+step*.001;x+=step){const xx=Math.min(x,width/2);fg.push(xx,-depth/2,-.082,xx,depth/2,-.082)}
+   for(let y=-depth/2;y<=depth/2+step*.001;y+=step){const yy=Math.min(y,depth/2);fg.push(-width/2,yy,-.082,width/2,yy,-.082)}
+   addGridSegments(floorGrid,fg,grout);
+   const zvals=[];for(let z=0;z<=height+step*.001;z+=step)zvals.push(Math.min(z,height));if(zvals[zvals.length-1]!==height)zvals.push(height);
+   const xvals=[];for(let x=-width/2;x<=width/2+step*.001;x+=step)xvals.push(Math.min(x,width/2));if(xvals[xvals.length-1]!==width/2)xvals.push(width/2);
+   const yvals=[];for(let y=-depth/2;y<=depth/2+step*.001;y+=step)yvals.push(Math.min(y,depth/2));if(yvals[yvals.length-1]!==depth/2)yvals.push(depth/2);
+   for(const x of xvals)wg.push(x,depth/2,0,x,depth/2,height);
+   for(const z of zvals)wg.push(-width/2,depth/2,z,width/2,depth/2,z);
+   for(const y of yvals){wg.push(-width/2,y,0,-width/2,y,height);wg.push(width/2,y,0,width/2,y,height)}
+   for(const z of zvals){wg.push(-width/2,-depth/2,z,-width/2,depth/2,z);wg.push(width/2,-depth/2,z,width/2,depth/2,z)}
+   addGridSegments(wallGrid,wg,wallGrout);
+ }
+ function applyRoomDimensions(){const wi=document.getElementById('roomW'),di=document.getElementById('roomD'),hi=document.getElementById('roomH'),width=Number(wi.value),depth=Number(di.value),height=Number(hi.value),status=document.getElementById('roomStatus');if(!wi.value.trim()||!di.value.trim()||!hi.value.trim()||!Number.isFinite(width)||!Number.isFinite(depth)||!Number.isFinite(height)||width<=0||depth<=0||height<=0){status.textContent='Inserisci tre misure positive e finite, senza un limite massimo prefissato.';return false}updateRoomGeometry(width,depth,height);const fit=Math.max(width,depth,height,3.2)/3.2;camera.position.set(2.65*fit,-2.65*fit,2.2*fit);camera.far=Math.max(100,fit*30);camera.updateProjectionMatrix();controls.target.set(0,0,-.015);controls.maxDistance=Math.max(8,Math.max(width,depth,height)*3);controls.update();status.textContent=`Dimensioni applicate: ${width.toLocaleString('it-IT',{maximumFractionDigits:2})} × ${depth.toLocaleString('it-IT',{maximumFractionDigits:2})} × ${height.toLocaleString('it-IT',{maximumFractionDigits:2})} m`;err.style.display='none';return true}
+ document.getElementById('roomTools').addEventListener('submit',event=>{event.preventDefault();applyRoomDimensions()});applyRoomDimensions();
  // Caricamento locale di fotografie come texture fisiche sulle superfici selezionate.
  function bindPhoto(buttonId,inputId,material){
    const button=document.getElementById(buttonId),input=document.getElementById(inputId);
@@ -114,8 +135,6 @@ document.getElementById('roomTools').addEventListener('submit',event=>{event.pre
    recognition.onend=()=>{if(voiceButton.textContent==='Ascolto…')voiceButton.textContent='🎙 Comando vocale'};
    try{recognition.start()}catch(e){err.style.display='block';err.textContent='Impossibile avviare il microfono: '+e.message;voiceButton.textContent='🎙 Comando vocale'}
  });
- for(let x=-3;x<=3.01;x+=.75){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,.775,-.12),new THREE.Vector3(x,.775,2.85)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
- for(let z=.0;z<=2.851;z+=.5){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,.775,z),new THREE.Vector3(3,.775,z)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
  const hemi=new THREE.HemisphereLight(0xeaf4fa,0x303438,.32);scene.add(hemi);
  const key=new THREE.DirectionalLight(0xfff5e8,1.45);key.position.set(-2.5,-2,4);key.castShadow=true;key.shadow.mapSize.set(1536,1536);key.shadow.camera.left=-2;key.shadow.camera.right=2;key.shadow.camera.top=2;key.shadow.camera.bottom=-2;key.shadow.bias=-.00015;scene.add(key);
  const fill=new THREE.DirectionalLight(0xc7e2f5,.72);fill.position.set(2,1.5,2.8);scene.add(fill);
