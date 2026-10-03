@@ -1,72 +1,72 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Piatto doccia inox 240 × 80 cm</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101820;color:#edf3f6;font:15px system-ui,-apple-system,sans-serif}#view{position:absolute;inset:0;touch-action:none}canvas{display:block;width:100%;height:100%;touch-action:none}.panel{position:absolute;top:14px;left:14px;max-width:calc(100% - 28px);padding:13px 15px;border:1px solid #ffffff24;border-radius:12px;background:#13212bd9;backdrop-filter:blur(10px);pointer-events:none}h1{font-size:16px;margin:0 0 5px;font-weight:650}.sub{font-size:12px;color:#b8c7cf;line-height:1.5}.actions{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:8px;max-width:calc(100% - 16px)}button{border:1px solid #ffffff35;border-radius:10px;background:#203541;color:#f5f8fa;padding:11px 12px;font-size:13px;white-space:nowrap}button:active{background:#365365}#hint{position:absolute;bottom:72px;left:50%;transform:translateX(-50%);font-size:12px;color:#b8c7cf;background:#13212bd9;padding:7px 11px;border-radius:8px;white-space:nowrap;pointer-events:none}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#11181d;color:#f3f6f7;font:15px system-ui,-apple-system,sans-serif}#view{position:absolute;inset:0;touch-action:none}canvas{display:block;width:100%;height:100%;touch-action:none}.panel{position:absolute;top:12px;left:12px;padding:12px 14px;max-width:calc(100% - 24px);border:1px solid #ffffff25;border-radius:12px;background:#11191fdf;backdrop-filter:blur(12px);pointer-events:none}h1{font-size:16px;margin:0 0 5px;font-weight:650}.sub{font-size:12px;color:#c2cdd2;line-height:1.5}.actions{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:7px;max-width:calc(100% - 16px)}button{border:1px solid #ffffff45;border-radius:10px;background:#253640;color:#f5f8fa;padding:11px 12px;font-size:13px;white-space:nowrap}button:active{background:#405a67}#hint{position:absolute;bottom:67px;left:50%;transform:translateX(-50%);font-size:12px;color:#d0d9dd;background:#11191fdf;padding:7px 11px;border-radius:8px;white-space:nowrap;pointer-events:none}#error{display:none;position:absolute;left:12px;right:12px;top:100px;padding:12px;background:#452d25;color:#fff;border-radius:10px;font-size:13px}
 </style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head>
 <body>
-<div id="view"><canvas id="model"></canvas></div>
-<div class="panel"><h1>Piatto doccia in acciaio inox</h1><div class="sub">240 × 80 cm · ribasso centrale 5 cm · scarico Ø 10 cm<br>Modello concettuale interattivo</div></div>
+<div id="view"></div>
+<div class="panel"><h1>Piatto doccia in acciaio inox</h1><div class="sub">240 × 80 cm · ribasso centrale 5 cm · scarico Ø 10 cm<br>Modello 3D interattivo · inox spazzolato</div></div>
 <div id="hint">Trascina per ruotare · pizzica per ingrandire</div>
 <div class="actions"><button id="reset">Vista iniziale</button><button id="dims">Quote: ON</button><button id="top">Vista dall’alto</button></div>
-<script>
-(function(){
-'use strict';
-const canvas=document.getElementById('model'),ctx=canvas.getContext('2d');
-const L=2.4,W=.8,DROP=.05;
-let yaw=-.72,elev=.58,zoom=1,showDims=true,drag=null,pinch=null,raf=0;
-const corners=[[-L/2,-W/2,0],[L/2,-W/2,0],[L/2,W/2,0],[-L/2,W/2,0]],center=[0,0,-DROP];
-function resize(){const r=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.max(1,Math.round(r.width*dpr));canvas.height=Math.max(1,Math.round(r.height*dpr));ctx.setTransform(dpr,0,0,dpr,0,0);draw()}
-function project(p,w,h){
- const cy=Math.cos(yaw),sy=Math.sin(yaw),ce=Math.cos(elev),se=Math.sin(elev);
- const xr=p[0]*cy-p[1]*sy,dep=p[0]*sy+p[1]*cy;
- const depth=4.4-dep*ce-p[2]*se;
- const focal=Math.min(w,h)*1.02*zoom;
- return {x:w*.5+xr*focal/depth,y:h*.51-(p[2]*ce-dep*se)*focal/depth,depth};
-}
-function poly(points,fill,stroke){ctx.beginPath();points.forEach((p,i)=>{const q=project(p,canvas.clientWidth,canvas.clientHeight);if(i===0)ctx.moveTo(q.x,q.y);else ctx.lineTo(q.x,q.y)});ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.3;ctx.stroke()}}
-function line(a,b,color,width=1,dash=[]){const w=canvas.clientWidth,h=canvas.clientHeight,p=project(a,w,h),q=project(b,w,h);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.stroke();ctx.setLineDash([])}
-function text(str,p,dx,dy){const q=project(p,canvas.clientWidth,canvas.clientHeight);ctx.font='600 13px system-ui,-apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3.5;ctx.strokeStyle='#101820';ctx.strokeText(str,q.x+dx,q.y+dy);ctx.fillStyle='#edf5f8';ctx.fillText(str,q.x+dx,q.y+dy)}
-function draw(){
- const w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;
- ctx.clearRect(0,0,w,h);
- // subtle background glow
- const g=ctx.createRadialGradient(w*.5,h*.5,10,w*.5,h*.5,Math.max(w,h)*.65);g.addColorStop(0,'#182833');g.addColorStop(1,'#101820');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
- // Floor reference grid
- for(let x=-2;x<=2.001;x+=.2)line([x,-1.15,-.13],[x,1.15,-.13],'rgba(150,180,195,.08)',.7);
- for(let y=-1;y<=1.001;y+=.2)line([-2,y,-.13],[2,y,-.13],'rgba(150,180,195,.08)',.7);
- // Four continuous sloping triangular planes, perimeter at zero and center -5 cm
- const shades=['#c7d1d6','#9eabb2','#d5dde0','#aebbc1'];
- for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4];poly([a,b,center],shades[i],'#e1e9ec')}
- // perimeter and central drain
- for(let i=0;i<4;i++)line(corners[i],corners[(i+1)%4],'#f0f5f7',2);
- const c=project(center,w,h),rad=Math.max(5,Math.min(w,h)*.05*zoom*1.02/(4.4+.05*Math.sin(elev)));
- ctx.save();ctx.translate(c.x,c.y);ctx.scale(1,.55+Math.abs(Math.sin(elev))*.25);
- const rg=ctx.createRadialGradient(-rad*.25,-rad*.3,1,0,0,rad*1.4);rg.addColorStop(0,'#35434b');rg.addColorStop(.55,'#17232a');rg.addColorStop(1,'#66747b');ctx.beginPath();ctx.arc(0,0,rad,0,Math.PI*2);ctx.fillStyle=rg;ctx.fill();ctx.strokeStyle='#e5edf0';ctx.lineWidth=2;ctx.stroke();ctx.beginPath();ctx.arc(0,0,rad*.66,0,Math.PI*2);ctx.strokeStyle='#0b1217';ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
- if(showDims){
-  line([-L/2,-W/2-.12,.012],[L/2,-W/2-.12,.012],'#d9e5ea',1.2);line([-L/2,-W/2-.16,.012],[-L/2,-W/2-.08,.012],'#d9e5ea');line([L/2,-W/2-.16,.012],[L/2,-W/2-.08,.012],'#d9e5ea');text('240 cm',[0,-W/2-.16,.02],0,-10);
-  line([L/2+.12,-W/2,.012],[L/2+.12,W/2,.012],'#d9e5ea',1.2);line([L/2+.08,-W/2,.012],[L/2+.16,-W/2,.012],'#d9e5ea');line([L/2+.08,W/2,.012],[L/2+.16,W/2,.012],'#d9e5ea');text('80 cm',[L/2+.14,0,.02],15,0);
-  line([0,0,-DROP],[.18,0,-DROP],'#f2f7f9',1.2);text('−5 cm',[.18,0,-DROP],18,0);text('Scarico Ø 10 cm',[0,.13,-DROP],0,15);
- }
-}
-function reset(){yaw=-.72;elev=.58;zoom=1;draw()}
-document.getElementById('reset').addEventListener('click',reset);
-document.getElementById('dims').addEventListener('click',()=>{showDims=!showDims;document.getElementById('dims').textContent='Quote: '+(showDims?'ON':'OFF');draw()});
-document.getElementById('top').addEventListener('click',()=>{elev=1.48;yaw=-.72;draw()});
-canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,id:e.pointerId}});
-canvas.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.x=e.clientX;drag.y=e.clientY;yaw+=dx*.009;elev=Math.max(.08,Math.min(1.5,elev+dy*.007));draw()});
-canvas.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId)drag=null});
-canvas.addEventListener('pointercancel',()=>{drag=null});
-canvas.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.65,Math.min(2.2,zoom*(e.deltaY<0?1.08:.92)));draw()},{passive:false});
-let touchDistance=0;
-canvas.addEventListener('touchstart',e=>{if(e.touches.length===2){touchDistance=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);drag=null}},{passive:true});
-canvas.addEventListener('touchmove',e=>{if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(touchDistance)zoom=Math.max(.65,Math.min(2.2,zoom*d/touchDistance));touchDistance=d;draw()}},{passive:true});
-canvas.addEventListener('touchend',()=>{touchDistance=0},{passive:true});
-window.addEventListener('resize',resize);resize();reset();
-})();
+<div id="error"></div>
+<script type="module">
+const host=document.getElementById('view'),err=document.getElementById('error');
+try{
+ const THREE=await import('three');
+ const {OrbitControls}=await import('three/addons/controls/OrbitControls.js');
+ const scene=new THREE.Scene();scene.background=new THREE.Color(0x20272b);
+ const camera=new THREE.PerspectiveCamera(36,1,.01,100);camera.up.set(0,0,1);
+ const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);
+ const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.075;controls.minDistance=1.5;controls.maxDistance=8;controls.target.set(0,0,0);
+ // Procedural studio environment: broad softboxes create readable reflections on metal.
+ const envCanvas=document.createElement('canvas');envCanvas.width=1024;envCanvas.height=512;const ec=envCanvas.getContext('2d');
+ const eg=ec.createLinearGradient(0,0,0,512);eg.addColorStop(0,'#202a31');eg.addColorStop(.38,'#9aa6ac');eg.addColorStop(.55,'#343e44');eg.addColorStop(1,'#151c21');ec.fillStyle=eg;ec.fillRect(0,0,1024,512);
+ [[70,0,115,512,'#e6edf0'],[230,0,290,512,'#39464e'],[390,0,475,512,'#f3f5f4'],[590,0,660,512,'#5c6970'],[760,0,865,512,'#e5e9e9'],[945,0,1000,512,'#4d5a61']].forEach(([x,y,w,h,c])=>{const g=ec.createLinearGradient(x,0,x+w,0);g.addColorStop(0,'#11191f');g.addColorStop(.35,c);g.addColorStop(.7,c);g.addColorStop(1,'#182127');ec.fillStyle=g;ec.fillRect(x,y,w,h)});
+ const envTex=new THREE.CanvasTexture(envCanvas);envTex.mapping=THREE.EquirectangularReflectionMapping;envTex.colorSpace=THREE.SRGBColorSpace;scene.environment=envTex;
+ // Bathroom floor and tiled wall for context.
+ const floorMat=new THREE.MeshStandardMaterial({color:0x777b7b,roughness:.82,metalness:.03});
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(6,5),floorMat);floor.position.set(0,0,-.125);floor.receiveShadow=true;scene.add(floor);
+ const grout=new THREE.LineBasicMaterial({color:0x4d5558,transparent:true,opacity:.65});
+ for(let x=-3;x<=3.01;x+=.4){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,-2.5,-.122),new THREE.Vector3(x,2.5,-.122)]),grout);scene.add(l)}
+ for(let y=-2.5;y<=2.51;y+=.4){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,y,-.122),new THREE.Vector3(3,y,-.122)]),grout);scene.add(l)}
+ const wallMat=new THREE.MeshStandardMaterial({color:0x777b7d,roughness:.9});
+ const wall=new THREE.Mesh(new THREE.PlaneGeometry(6,3),wallMat);wall.rotation.x=Math.PI/2;wall.position.set(0,.78,1.35);wall.receiveShadow=true;scene.add(wall);
+ for(let x=-3;x<=3.01;x+=.75){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,.775,-.12),new THREE.Vector3(x,.775,2.85)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
+ for(let z=.0;z<=2.851;z+=.5){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,.775,z),new THREE.Vector3(3,.775,z)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
+ const hemi=new THREE.HemisphereLight(0xeaf4fa,0x41474a,1.45);scene.add(hemi);
+ const key=new THREE.DirectionalLight(0xfff5e8,3.2);key.position.set(-2.5,-2,4);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.camera.left=-2;key.shadow.camera.right=2;key.shadow.camera.top=2;key.shadow.camera.bottom=-2;scene.add(key);
+ const fill=new THREE.DirectionalLight(0xc7e2f5,2.2);fill.position.set(2,1.5,2.8);scene.add(fill);
+ const L=2.4,W=.8,D=.05,corners=[[-L/2,-W/2,0],[L/2,-W/2,0],[L/2,W/2,0],[-L/2,W/2,0]],center=[0,0,-D];
+ const product=new THREE.Group();scene.add(product);
+ // Fine directional brushing texture on the steel.
+ const texCanvas=document.createElement('canvas');texCanvas.width=512;texCanvas.height=512;const tc=texCanvas.getContext('2d');tc.fillStyle='#b8c1c5';tc.fillRect(0,0,512,512);
+ for(let i=0;i<36000;i++){const y=Math.random()*512,x=Math.random()*512;tc.fillStyle=Math.random()>.5?'rgba(255,255,255,.07)':'rgba(30,43,50,.045)';tc.fillRect(x,y,Math.random()*22+.5,.45)}
+ const brush=new THREE.CanvasTexture(texCanvas);brush.wrapS=brush.wrapT=THREE.RepeatWrapping;brush.repeat.set(2,1);brush.colorSpace=THREE.SRGBColorSpace;
+ const steel=new THREE.MeshPhysicalMaterial({color:0xc4cdd1,metalness:.92,roughness:.24,envMapIntensity:1.55,clearcoat:.32,clearcoatRoughness:.2,side:THREE.DoubleSide,map:brush});
+ for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4],g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...center],3));g.computeVertexNormals();const face=new THREE.Mesh(g,steel);face.castShadow=true;face.receiveShadow=true;product.add(face)}
+ const edgeMat=new THREE.MeshStandardMaterial({color:0xe0e6e8,metalness:.95,roughness:.2,envMapIntensity:1.4});
+ for(let i=0;i<4;i++){const curve=new THREE.LineCurve3(new THREE.Vector3(...corners[i]),new THREE.Vector3(...corners[(i+1)%4]));const edge=new THREE.Mesh(new THREE.TubeGeometry(curve,1,.006,6,false),edgeMat);product.add(edge)}
+ // Drain recess and brushed circular collar.
+ const drain=new THREE.Mesh(new THREE.CircleGeometry(.05,64),new THREE.MeshStandardMaterial({color:0x141b1f,metalness:.65,roughness:.34,side:THREE.DoubleSide}));drain.position.set(0,0,-D+.002);product.add(drain);
+ const collar=new THREE.Mesh(new THREE.RingGeometry(.052,.064,64),new THREE.MeshPhysicalMaterial({color:0x89969c,metalness:.98,roughness:.18,envMapIntensity:1.8,side:THREE.DoubleSide}));collar.position.set(0,0,-D+.004);product.add(collar);
+ // Thin dark underside gives the sheet a visible finished edge.
+ const sideMat=new THREE.MeshStandardMaterial({color:0x59656b,metalness:.85,roughness:.29,side:THREE.DoubleSide});
+ for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4],a2=[a[0],a[1],-.018],b2=[b[0],b[1],-.018],g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...b2,...a,...b2,...a2],3));g.computeVertexNormals();product.add(new THREE.Mesh(g,sideMat))}
+ const dims=new THREE.Group();scene.add(dims);const lineMat=new THREE.LineBasicMaterial({color:0xf2f5f6});
+ function seg(a,b){dims.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a),new THREE.Vector3(...b)]),lineMat))}
+ function tag(str,pos){const c=document.createElement('canvas');c.width=256;c.height=64;const x=c.getContext('2d');x.font='bold 30px system-ui';x.textAlign='center';x.fillStyle='#f7fafb';x.shadowColor='#11191f';x.shadowBlur=5;x.fillText(str,128,43);const t=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false}));s.position.set(...pos);s.scale.set(.48,.12,1);dims.add(s)}
+ seg([-1.2,-.55,.018],[1.2,-.55,.018]);tag('240 cm',[0,-.65,.035]);seg([1.32,-.4,.018],[1.32,.4,.018]);tag('80 cm',[1.42,0,.03]);seg([0,0,-.05],[.16,0,-.05]);tag('−5 cm',[.25,.02,-.05]);tag('Scarico Ø 10 cm',[0,.14,-.04]);
+ const gridToggle=()=>{dims.visible=!dims.visible;document.getElementById('dims').textContent='Quote: '+(dims.visible?'ON':'OFF')};document.getElementById('dims').onclick=gridToggle;
+ function initial(){camera.position.set(2.9,-2.9,2.45);controls.target.set(0,0,-.015);controls.update()}initial();
+ document.getElementById('reset').onclick=initial;document.getElementById('top').onclick=()=>{camera.position.set(0,-.01,4.4);controls.target.set(0,0,-.02);controls.update()};
+ function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}window.addEventListener('resize',resize);resize();
+ renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera)});
+}catch(e){console.error(e);err.style.display='block';err.textContent='Avvio 3D non riuscito: '+(e&&e.message?e.message:'browser non compatibile')+'. Prova ad aprire il link direttamente in Safari.'}
 </script>
 </body></html>
