@@ -53,7 +53,7 @@ try{
  const floorGrid=new THREE.Group(),wallGrid=new THREE.Group();scene.add(floorGrid,wallGrid);
  const grout=new THREE.LineBasicMaterial({color:0x777b7b,transparent:true,opacity:.5});
  const wallGrout=new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45});
- function clearGroup(group){while(group.children.length){const child=group.children.pop();if(child.geometry)child.geometry.dispose();if(child.parent)child.parent.remove(child)}}
+ function clearGroup(group){while(group.children.length){const child=group.children[0];group.remove(child);if(child.geometry)child.geometry.dispose()}}
  function addGridSegments(group,coords,material){if(!coords.length)return;const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(coords,3));group.add(new THREE.LineSegments(geometry,material))}
  function updateRoomGeometry(width,depth,height){
    floor.scale.set(width/6,depth/5,1);
