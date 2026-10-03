@@ -42,9 +42,16 @@ jobs:
           grep -q 'id="roomStatus"' index.html
           grep -q 'id="command"' index.html
           grep -q 'id="sendCommand"' index.html
-          grep -q 'id="voice"' index.html
           grep -q 'function interpretVoice' index.html
+          ! grep -q 'class="actions"' index.html
+          ! grep -q 'id="dims"' index.html
+          ! grep -q 'id="voice"' index.html
           grep -q 'function updateRoomGeometry' index.html
+
+      - name: Check inline JavaScript syntax
+        run: |
+          node -e "const fs=require('fs');const html=fs.readFileSync('index.html','utf8');const m=html.match(/<script type=\"module\">([\\s\\S]*?)<\\/script>/);if(!m)throw new Error('Modulo JavaScript assente');fs.writeFileSync('/tmp/site-check.mjs',m[1]);"
+          node --check /tmp/site-check.mjs
 
       - name: Install Playwright
         run: |
@@ -109,9 +116,7 @@ jobs:
             await page.locator('#command').fill('Carrara sul pavimento');
             await page.locator('#sendCommand').click();
             if((await page.locator('#error').textContent()).trim()) throw new Error('Comando materiale segnalato come errore: '+await page.locator('#error').textContent());
-            await page.locator('#dims').click();
-            await page.locator('#steel').click();
-            await page.locator('#light').click();
+            if(await page.locator('.actions').count()) throw new Error('Toolbar vista non rimossa');
             await noScroll();
             await page.screenshot({path:'3d-site-check.png',fullPage:true});
             if(errors.length) throw new Error('Errori browser: '+errors.join(' | '));
