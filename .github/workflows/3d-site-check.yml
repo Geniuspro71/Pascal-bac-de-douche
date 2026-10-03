@@ -14,12 +14,20 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
+
+      - name: Verify voice and vector controls exist
+        run: |
+          grep -q 'id="voice"' index.html
+          grep -q 'window.SpeechRecognition||window.webkitSpeechRecognition' index.html
+          grep -q 'function interpretVoice' index.html
+          grep -q 'id="vector"' index.html
+          grep -q 'piatto-doccia-tavola-preliminare.svg' index.html
 
       - name: Install Playwright
         run: |
