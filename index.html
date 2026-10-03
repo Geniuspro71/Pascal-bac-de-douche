@@ -14,7 +14,7 @@
 <form id="roomTools" aria-label="Dimensioni della stanza" novalidate><strong>Dimensioni stanza</strong><div class="roomField"><label for="roomW">Larghezza (m)</label><input id="roomW" name="larghezza" type="number" min="0.1" step="0.1" value="3.2" required></div><div class="roomField"><label for="roomD">Profondità (m)</label><input id="roomD" name="profondita" type="number" min="0.1" step="0.1" value="2.4" required></div><div class="roomField"><label for="roomH">Altezza (m)</label><input id="roomH" name="altezza" type="number" min="0.1" step="0.1" value="2.7" required></div><button id="applyRoom" type="submit">Applica</button><output id="roomStatus" aria-live="polite"></output></form>
 <div id="hint">Trascina per ruotare · pizzica per ingrandire</div>
 <div id="assistant"><input id="command" type="text" aria-label="Comando materiali" placeholder="Scrivi: pietra blu sulla parete…"><button id="sendCommand" type="button">Applica</button></div>
-<div class="actions"><button id="reset" class="active">Isometrica</button><button id="top">Dall’alto</button><button id="side">Laterale</button><button id="drainView">Scarico</button><button id="dims" class="active">Quote ON</button><button id="steel">Acrilico satinato</button><button id="light" class="active">Luci ON</button><button id="floorPhoto">Foto pavimento</button><button id="wallPhoto">Foto parete</button><button id="voice">🎙 Comando vocale</button><input id="floorFile" type="file" accept="image/*" hidden><input id="wallFile" type="file" accept="image/*" hidden></div>
+<div class="actions" aria-label="Strumenti del modello 3D"><button id="dims" class="active" type="button">Quote ON</button><button id="steel" type="button">Acrilico satinato</button><button id="light" class="active" type="button">Luci ON</button><button id="floorPhoto" type="button">Foto pavimento</button><button id="wallPhoto" type="button">Foto parete</button><button id="voice" type="button">🎙 Comando vocale</button><input id="floorFile" type="file" accept="image/*" hidden><input id="wallFile" type="file" accept="image/*" hidden></div>
 <div id="error"></div>
 <script type="module">
 const host=document.getElementById('view'),err=document.getElementById('error');
@@ -192,11 +192,8 @@ try{
  steelBtn.onclick=()=>{polished=!polished;steel.roughness=polished ? .16 : .28;steel.clearcoat=polished ? .86 : .58;steel.clearcoatRoughness=polished ? .1 : .2;steel.envMapIntensity=polished ? .95 : .65;steel.needsUpdate=true;steelBtn.textContent=polished?'Acrilico lucido':'Acrilico satinato';steelBtn.classList.toggle('active',!polished)};
  lightBtn.onclick=()=>{lightsOn=!lightsOn;key.intensity=lightsOn?baseLight[0]:.12;fill.intensity=lightsOn?baseLight[1]:.05;rim.intensity=lightsOn?baseLight[2]:.08;hemi.intensity=lightsOn ? .32 : .12;lightBtn.textContent='Luci '+(lightsOn?'ON':'soft');lightBtn.classList.toggle('active',lightsOn)};
  function aim(pos,target=[0,0,-.015]){camera.position.set(...pos);controls.target.set(...target);controls.update()}
- function initial(){aim([2.65,-2.65,2.2]);document.getElementById('reset').classList.add('active')}
- initial();document.getElementById('reset').onclick=initial;
- document.getElementById('top').onclick=()=>aim([0,-.01,4.4],[0,0,-.02]);
- document.getElementById('side').onclick=()=>aim([0,-3.7,1.25],[0,0,-.02]);
- document.getElementById('drainView').onclick=()=>aim([.9,-1.05,1.1],[0,0,-.05]);
+ function initial(){aim([2.65,-2.65,2.2])}
+ initial();
  function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}window.addEventListener('resize',resize);resize();
  renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera)});
 }catch(e){console.error(e);err.style.display='block';err.textContent='Avvio 3D non riuscito: '+(e&&e.message?e.message:'browser non compatibile')+'. Prova ad aprire il link direttamente in Safari.'}
