@@ -10,7 +10,7 @@
 </head>
 <body>
 <div id="view"></div>
-<div class="panel"><h1>Piatto doccia · acrilico</h1><div class="sub">240 × 80 cm · acrilico 5 mm su vetroresina<br>Ribasso 5 cm · scarico Ø 10 cm · 4 falde</div></div>
+<div class="panel"><h1>Piatto doccia · acrilico</h1><div class="sub">240 × 80 cm · acrilico 5 mm su vetroresina<br>Ribasso 5 cm · scarico rettangolare 11 × 10 cm · 4 falde</div></div>
 <div id="hint">Trascina per ruotare · pizzica per ingrandire</div>
 <div id="assistant"><input id="command" type="text" aria-label="Comando materiali" placeholder="Scrivi: pietra blu sulla parete…"><button id="sendCommand" type="button">Applica</button></div>
 <div class="actions"><button id="reset" class="active">Isometrica</button><button id="top">Dall’alto</button><button id="side">Laterale</button><button id="drainView">Scarico</button><button id="dims" class="active">Quote ON</button><button id="steel">Acrilico satinato</button><button id="light" class="active">Luci ON</button><button id="floorPhoto">Foto pavimento</button><button id="wallPhoto">Foto parete</button><button id="voice">🎙 Comando vocale</button><input id="floorFile" type="file" accept="image/*" hidden><input id="wallFile" type="file" accept="image/*" hidden></div>
@@ -119,21 +119,23 @@ try{
  const rim=new THREE.DirectionalLight(0xffffff,.9);rim.position.set(0,3,2.2);scene.add(rim);
  const L=2.4,W=.8,D=.05,corners=[[-L/2,-W/2,0],[L/2,-W/2,0],[L/2,W/2,0],[-L/2,W/2,0]],center=[0,0,-D];
  const product=new THREE.Group();product.position.z=0;scene.add(product);
- // Pelle acrilica lucida da 5 mm, rappresentata come superficie non metallica.
+ // Pelle acrilica non metallica da 5 mm e corpo di supporto in vetroresina.
  const steel=new THREE.MeshPhysicalMaterial({color:0xf0eee9,metalness:0,roughness:.24,envMapIntensity:.72,clearcoat:.72,clearcoatRoughness:.16,side:THREE.DoubleSide});
- // Quattro falde triangolari con apertura circolare reale: la lamiera non copre lo scarico.
+ const fiberglassMat=new THREE.MeshStandardMaterial({color:0xe4e0d7,metalness:0,roughness:.62,side:THREE.DoubleSide});
+ // Quattro falde inclinate con apertura rettangolare 11 × 10 cm al centro.
  for(let i=0;i<4;i++){
    const a=corners[i],b=corners[(i+1)%4],ax=a[0],ay=a[1],bx=b[0],by=b[1],ex=bx-ax,ey=by-ay;
    const start=Math.atan2(ay,ax),end=Math.atan2(by,bx),sweep=((end-start)%(Math.PI*2)+Math.PI*2)%(Math.PI*2),segments=48;
    const positions=[],uvs=[],indices=[];
    for(let j=0;j<=segments;j++){
      const theta=start+sweep*j/segments,dx=Math.cos(theta),dy=Math.sin(theta),den=dx*ey-dy*ex;
-     const t=(ax*ey-ay*ex)/den,r=.05,z=-D*(1-r/t);
+     const t=(ax*ey-ay*ex)/den,r=Math.min(.055/Math.max(Math.abs(dx),1e-9),.05/Math.max(Math.abs(dy),1e-9)),z=-D*(1-r/t);
      positions.push(dx*r,dy*r,z,dx*t,dy*t,0);
      uvs.push(dx*r/L+.5,dy*r/W+.5,dx*t/L+.5,dy*t/W+.5);
    }
    for(let j=0;j<segments;j++){const k=j*2;indices.push(k,k+1,k+2,k+1,k+3,k+2)}
    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));g.setIndex(indices);g.computeVertexNormals();
+   const backingGeometry=g.clone();backingGeometry.translate(0,0,-.005);const backing=new THREE.Mesh(backingGeometry,fiberglassMat);backing.castShadow=true;backing.receiveShadow=true;product.add(backing);
    const face=new THREE.Mesh(g,steel);face.castShadow=true;face.receiveShadow=true;product.add(face);
  }
  const edgeMat=new THREE.MeshStandardMaterial({color:0xe6e2d9,metalness:0,roughness:.32});
@@ -141,17 +143,26 @@ try{
  // Delicate facet junctions define the four sloped triangular planes.
  const seamMat=new THREE.MeshStandardMaterial({color:0xc7c2b9,metalness:0,roughness:.42,transparent:true,opacity:.5});
  for(const p of corners){const path=new THREE.LineCurve3(new THREE.Vector3(...p),new THREE.Vector3(0,0,-D));product.add(new THREE.Mesh(new THREE.TubeGeometry(path,12,.0018,5,false),seamMat));}
- // Scarico circolare Ø 10 cm: parete interna scura e fondo incassato sotto la lamiera.
- const drainWall=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.026,128,1,true),new THREE.MeshStandardMaterial({color:0x222a2e,metalness:.55,roughness:.3,side:THREE.DoubleSide}));drainWall.rotation.x=Math.PI/2;drainWall.position.set(0,0,-D-.012);product.add(drainWall);
- const drain=new THREE.Mesh(new THREE.CircleGeometry(.048,128),new THREE.MeshStandardMaterial({color:0x080b0d,metalness:.25,roughness:.3,side:THREE.DoubleSide}));drain.position.set(0,0,-D-.026);product.add(drain);
- const collar=new THREE.Mesh(new THREE.RingGeometry(.050,.060,128),new THREE.MeshPhysicalMaterial({color:0xaebbc1,metalness:.98,roughness:.2,envMapIntensity:2.0,side:THREE.DoubleSide}));collar.position.set(0,0,-D+.008);product.add(collar);
- // Thin dark underside gives the sheet a visible finished edge.
+ // Scarico rettangolare 11 × 10 cm, con pareti interne e cornice composite.
+ const drainMat=new THREE.MeshStandardMaterial({color:0x202629,metalness:0,roughness:.5,side:THREE.DoubleSide});
+ const frameMat=new THREE.MeshPhysicalMaterial({color:0xe8e4dc,metalness:0,roughness:.3,clearcoat:.5,side:THREE.DoubleSide});
+ const drainDepth=.026,drainX=.11,drainY=.10,frame=.004;
+ const wallParts=[
+   {x:-(drainX/2+frame/2),y:0,w:frame,h:drainY},
+   {x: drainX/2+frame/2,y:0,w:frame,h:drainY},
+   {x:0,y:-(drainY/2+frame/2),w:drainX+2*frame,h:frame},
+   {x:0,y: drainY/2+frame/2,w:drainX+2*frame,h:frame}
+ ];
+ wallParts.forEach(p=>{const m=new THREE.Mesh(new THREE.BoxGeometry(p.w,p.h,drainDepth),drainMat);m.position.set(p.x,p.y,-D-drainDepth/2);product.add(m)});
+ wallParts.forEach(p=>{const m=new THREE.Mesh(new THREE.BoxGeometry(p.w,p.h,.002),frameMat);m.position.set(p.x,p.y,-D+.001);product.add(m)});
+ const drain=new THREE.Mesh(new THREE.BoxGeometry(drainX,drainY,.002),new THREE.MeshStandardMaterial({color:0x080b0d,metalness:0,roughness:.72}));drain.position.set(0,0,-D-drainDepth+.001);product.add(drain);
+ // Bordo di supporto in vetroresina sotto la pelle acrilica.
  const sideMat=new THREE.MeshStandardMaterial({color:0xe1dcd2,metalness:0,roughness:.48,side:THREE.DoubleSide});
  for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4],a2=[a[0],a[1],-.018],b2=[b[0],b[1],-.018],g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...b2,...a,...b2,...a2],3));g.computeVertexNormals();product.add(new THREE.Mesh(g,sideMat))}
  const dims=new THREE.Group();dims.position.z=0;scene.add(dims);const lineMat=new THREE.LineBasicMaterial({color:0xf2f5f6});
  function seg(a,b){dims.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a),new THREE.Vector3(...b)]),lineMat))}
  function tag(str,pos){const c=document.createElement('canvas');c.width=256;c.height=64;const x=c.getContext('2d');x.font='bold 30px system-ui';x.textAlign='center';x.lineWidth=5;x.strokeStyle='rgba(12,18,22,.9)';x.strokeText(str,128,43);x.fillStyle='#ffffff';x.shadowColor='#11191f';x.shadowBlur=4;x.fillText(str,128,43);const t=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false}));s.position.set(...pos);s.scale.set(.48,.12,1);dims.add(s)}
- seg([-1.2,-.55,.018],[1.2,-.55,.018]);tag('240 cm',[0,-.65,.035]);seg([1.32,-.4,.018],[1.32,.4,.018]);tag('80 cm',[1.42,0,.03]);seg([0,0,-.05],[.16,0,-.05]);tag('−5 cm',[.25,.02,-.05]);tag('Scarico Ø 10 cm',[0,.14,-.04]);
+ seg([-1.2,-.55,.018],[1.2,-.55,.018]);tag('240 cm',[0,-.65,.035]);seg([1.32,-.4,.018],[1.32,.4,.018]);tag('80 cm',[1.42,0,.03]);seg([0,0,-.05],[.16,0,-.05]);tag('−5 cm',[.25,.02,-.05]);tag('Scarico 11 × 10 cm',[0,.14,-.04]);
  const dimsBtn=document.getElementById('dims'),steelBtn=document.getElementById('steel'),lightBtn=document.getElementById('light');
  // Esportazione vettoriale esclusa dalla presente anteprima.
  const gridToggle=()=>{dims.visible=!dims.visible;dimsBtn.textContent='Quote '+(dims.visible?'ON':'OFF');dimsBtn.classList.toggle('active',dims.visible)};dimsBtn.onclick=gridToggle;
