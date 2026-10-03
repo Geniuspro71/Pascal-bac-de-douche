@@ -26,6 +26,8 @@ jobs:
           grep -q 'id="voice"' index.html
           grep -q 'window.SpeechRecognition||window.webkitSpeechRecognition' index.html
           grep -q 'function interpretVoice' index.html
+          grep -q 'id="command"' index.html
+          grep -q 'id="sendCommand"' index.html
           grep -q 'id="vector"' index.html
           grep -q 'piatto-doccia-tavola-preliminare.svg' index.html
 
