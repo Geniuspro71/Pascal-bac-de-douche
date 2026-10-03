@@ -45,10 +45,10 @@ try{
  }
  const floorMarble=marbleTexture(7821),wallMarble=marbleTexture(1427);
  const floorMat=new THREE.MeshStandardMaterial({map:floorMarble,bumpMap:floorMarble,bumpScale:.001,color:0xbab9b3,roughness:.58,metalness:0});
- const floor=new THREE.Mesh(new THREE.PlaneGeometry(6,5),floorMat);floor.position.set(0,0,-.012);floor.receiveShadow=true;scene.add(floor);
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(6,5),floorMat);floor.position.set(0,0,-.085);floor.receiveShadow=true;scene.add(floor);
  const grout=new THREE.LineBasicMaterial({color:0x777b7b,transparent:true,opacity:.5});
- for(let x=-3;x<=3.01;x+=.8){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,-2.5,-.009),new THREE.Vector3(x,2.5,-.009)]),grout);scene.add(l)}
- for(let y=-2.5;y<=2.51;y+=.8){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,y,-.009),new THREE.Vector3(3,y,-.009)]),grout);scene.add(l)}
+ for(let x=-3;x<=3.01;x+=.8){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,-2.5,-.082),new THREE.Vector3(x,2.5,-.082)]),grout);scene.add(l)}
+ for(let y=-2.5;y<=2.51;y+=.8){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,y,-.082),new THREE.Vector3(3,y,-.082)]),grout);scene.add(l)}
  const wallMat=new THREE.MeshStandardMaterial({map:wallMarble,bumpMap:wallMarble,bumpScale:.0012,color:0xd0ceca,roughness:.48,metalness:0});
  const wall=new THREE.Mesh(new THREE.PlaneGeometry(6,3),wallMat);wall.rotation.x=Math.PI/2;wall.position.set(0,.78,1.35);wall.receiveShadow=true;scene.add(wall);
  for(let x=-3;x<=3.01;x+=.75){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,.775,-.12),new THREE.Vector3(x,.775,2.85)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
