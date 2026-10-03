@@ -1,0 +1,77 @@
+name: Verify 3D shower tray site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: Wait for GitHub Pages
+        run: |
+          for i in $(seq 1 18); do
+            code=$(curl -L -s -o /tmp/site.html -w "%{http_code}" "https://geniuspro71.github.io/Pascal-bac-de-douche/?check=${GITHUB_SHA}")
+            if [ "$code" = "200" ] && grep -q "Piatto doccia in acciaio inox" /tmp/site.html; then
+              echo "GitHub Pages risponde HTTP 200"
+              exit 0
+            fi
+            echo "Tentativo $i: HTTP $code, attendo pubblicazione..."
+            sleep 10
+          done
+          echo "GitHub Pages non ha pubblicato la versione verificabile entro 3 minuti"
+          exit 1
+
+      - name: Test interactive 3D in Chromium
+        run: |
+          cat > /tmp/check-site.cjs <<'EOF'
+          const { chromium } = require('playwright');
+          (async () => {
+            const browser = await chromium.launch({headless:true});
+            const page = await browser.newPage({viewport:{width:1280,height:900}, deviceScaleFactor:1});
+            const errors = [];
+            page.on('pageerror', e => errors.push(e.message));
+            page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+            await page.goto('https://geniuspro71.github.io/Pascal-bac-de-douche/?check=' + Date.now(), {waitUntil:'networkidle',timeout:90000});
+            await page.waitForSelector('#view canvas', {timeout:45000});
+            await page.waitForTimeout(2500);
+            const canvas = await page.locator('#view canvas').evaluate(el => ({width:el.width,height:el.height,rect:el.getBoundingClientRect().toJSON()}));
+            if (canvas.width < 100 || canvas.height < 100 || canvas.rect.width < 100 || canvas.rect.height < 100) throw new Error('Canvas 3D presente ma senza dimensioni valide: '+JSON.stringify(canvas));
+            await page.getByRole('button', {name:'Vista iniziale'}).click();
+            await page.getByRole('button', {name:/Quote:/}).click();
+            await page.getByRole('button', {name:'Vista dall’alto'}).click();
+            await page.screenshot({path:'3d-site-check.png',fullPage:true});
+            if (errors.length) throw new Error('Errori browser: '+errors.join(' | '));
+            console.log('PASS: canvas 3D caricato e visibile; tre comandi interattivi attivati; nessun errore browser.');
+            console.log('Canvas:',JSON.stringify(canvas));
+            await browser.close();
+          })().catch(e => { console.error(e); process.exit(1); });
+          EOF
+          node /tmp/check-site.cjs
+
+      - name: Upload screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 3d-site-check-screenshot
+          path: 3d-site-check.png
+          if-no-files-found: ignore
