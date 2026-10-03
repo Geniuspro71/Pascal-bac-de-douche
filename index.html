@@ -28,13 +28,28 @@ try{
  // Physically based studio room environment with large reflection panels.
  const pmrem=new THREE.PMREMGenerator(renderer);pmrem.compileEquirectangularShader();
  const studio=new RoomEnvironment(renderer);const envRT=pmrem.fromScene(studio,.04);scene.environment=envRT.texture;studio.dispose();pmrem.dispose();
- // Bathroom floor and tiled wall for context.
- const floorMat=new THREE.MeshStandardMaterial({color:0x555b5e,roughness:.88,metalness:.02});
+ // Procedural Carrara marble: pale calcite base with fine branching grey mineral veins.
+ function marbleTexture(seed,wide=1024,high=1024){
+   const c=document.createElement('canvas');c.width=wide;c.height=high;const x=c.getContext('2d');
+   x.fillStyle='#e7e5df';x.fillRect(0,0,wide,high);
+   let n=seed>>>0;const rand=()=>{n=(n*1664525+1013904223)>>>0;return n/4294967296};
+   for(let i=0;i<26000;i++){const px=rand()*wide,py=rand()*high,v=rand()>.5?255:125;x.fillStyle='rgba('+v+','+v+','+v+','+(rand()*.035)+')';x.fillRect(px,py,1+rand()*2,1+rand()*2)}
+   for(let i=0;i<35;i++){
+     let px=rand()*wide,py=rand()*high,ang=(rand()-.5)*1.2,len=high*(.18+rand()*.55),steps=18+Math.floor(rand()*20);
+     x.beginPath();x.moveTo(px,py);
+     for(let j=1;j<=steps;j++){ang+=(rand()-.5)*.28;px+=Math.cos(ang)*len/steps;py+=Math.sin(ang)*len/steps;x.lineTo(px,py)}
+     x.strokeStyle='rgba(91,96,99,'+(.10+rand()*.19)+')';x.lineWidth=1+rand()*2.5;x.stroke();
+     if(i%2===0){const bx=px,by=py;x.beginPath();x.moveTo(bx,by);let ax=ang+(rand()-.5)*1.4;for(let j=0;j<9;j++){ax+=(rand()-.5)*.2;x.lineTo(bx+Math.cos(ax)*j*5,by+Math.sin(ax)*j*5)}x.strokeStyle='rgba(105,108,109,.18)';x.lineWidth=.8;x.stroke()}
+   }
+   const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=renderer.capabilities.getMaxAnisotropy();return t;
+ }
+ const floorMarble=marbleTexture(7821),wallMarble=marbleTexture(1427);
+ const floorMat=new THREE.MeshStandardMaterial({map:floorMarble,bumpMap:floorMarble,bumpScale:.0025,color:0xffffff,roughness:.31,metalness:0});
  const floor=new THREE.Mesh(new THREE.PlaneGeometry(6,5),floorMat);floor.position.set(0,0,-.125);floor.receiveShadow=true;scene.add(floor);
- const grout=new THREE.LineBasicMaterial({color:0x4d5558,transparent:true,opacity:.65});
- for(let x=-3;x<=3.01;x+=.4){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,-2.5,-.122),new THREE.Vector3(x,2.5,-.122)]),grout);scene.add(l)}
- for(let y=-2.5;y<=2.51;y+=.4){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,y,-.122),new THREE.Vector3(3,y,-.122)]),grout);scene.add(l)}
- const wallMat=new THREE.MeshStandardMaterial({color:0x777b7d,roughness:.9});
+ const grout=new THREE.LineBasicMaterial({color:0x777b7b,transparent:true,opacity:.5});
+ for(let x=-3;x<=3.01;x+=.8){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,-2.5,-.122),new THREE.Vector3(x,2.5,-.122)]),grout);scene.add(l)}
+ for(let y=-2.5;y<=2.51;y+=.8){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,y,-.122),new THREE.Vector3(3,y,-.122)]),grout);scene.add(l)}
+ const wallMat=new THREE.MeshStandardMaterial({map:wallMarble,bumpMap:wallMarble,bumpScale:.0018,color:0xffffff,roughness:.34,metalness:0});
  const wall=new THREE.Mesh(new THREE.PlaneGeometry(6,3),wallMat);wall.rotation.x=Math.PI/2;wall.position.set(0,.78,1.35);wall.receiveShadow=true;scene.add(wall);
  for(let x=-3;x<=3.01;x+=.75){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,.775,-.12),new THREE.Vector3(x,.775,2.85)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
  for(let z=.0;z<=2.851;z+=.5){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,.775,z),new THREE.Vector3(3,.775,z)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
