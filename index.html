@@ -23,7 +23,7 @@ try{
  const scene=new THREE.Scene();scene.background=new THREE.Color(0x20272b);
  const camera=new THREE.PerspectiveCamera(36,1,.01,100);camera.up.set(0,0,1);
  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
- renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.88;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.78;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);
  const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.075;controls.minDistance=1.5;controls.maxDistance=8;controls.target.set(0,0,0);
  // Physically based studio room environment with large reflection panels.
  const pmrem=new THREE.PMREMGenerator(renderer);pmrem.compileEquirectangularShader();
@@ -44,19 +44,19 @@ try{
    const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=renderer.capabilities.getMaxAnisotropy();return t;
  }
  const floorMarble=marbleTexture(7821),wallMarble=marbleTexture(1427);
- const floorMat=new THREE.MeshStandardMaterial({map:floorMarble,bumpMap:floorMarble,bumpScale:.0015,color:0xd5d3cc,roughness:.46,metalness:0});
+ const floorMat=new THREE.MeshStandardMaterial({map:floorMarble,bumpMap:floorMarble,bumpScale:.001,color:0xbab9b3,roughness:.58,metalness:0});
  const floor=new THREE.Mesh(new THREE.PlaneGeometry(6,5),floorMat);floor.position.set(0,0,-.05);floor.receiveShadow=true;scene.add(floor);
  const grout=new THREE.LineBasicMaterial({color:0x777b7b,transparent:true,opacity:.5});
  for(let x=-3;x<=3.01;x+=.8){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,-2.5,-.047),new THREE.Vector3(x,2.5,-.047)]),grout);scene.add(l)}
  for(let y=-2.5;y<=2.51;y+=.8){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,y,-.047),new THREE.Vector3(3,y,-.047)]),grout);scene.add(l)}
- const wallMat=new THREE.MeshStandardMaterial({map:wallMarble,bumpMap:wallMarble,bumpScale:.0018,color:0xffffff,roughness:.34,metalness:0});
+ const wallMat=new THREE.MeshStandardMaterial({map:wallMarble,bumpMap:wallMarble,bumpScale:.0012,color:0xd0ceca,roughness:.48,metalness:0});
  const wall=new THREE.Mesh(new THREE.PlaneGeometry(6,3),wallMat);wall.rotation.x=Math.PI/2;wall.position.set(0,.78,1.35);wall.receiveShadow=true;scene.add(wall);
  for(let x=-3;x<=3.01;x+=.75){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,.775,-.12),new THREE.Vector3(x,.775,2.85)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
  for(let z=.0;z<=2.851;z+=.5){const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3,.775,z),new THREE.Vector3(3,.775,z)]),new THREE.LineBasicMaterial({color:0x4e565a,transparent:true,opacity:.45}));scene.add(l)}
- const hemi=new THREE.HemisphereLight(0xeaf4fa,0x303438,.42);scene.add(hemi);
- const key=new THREE.DirectionalLight(0xfff5e8,1.45);key.position.set(-2.5,-2,4);key.castShadow=true;key.shadow.mapSize.set(1536,1536);key.shadow.camera.left=-2;key.shadow.camera.right=2;key.shadow.camera.top=2;key.shadow.camera.bottom=-2;key.shadow.bias=-.00015;scene.add(key);
- const fill=new THREE.DirectionalLight(0xc7e2f5,.62);fill.position.set(2,1.5,2.8);scene.add(fill);
- const rim=new THREE.DirectionalLight(0xffffff,.85);rim.position.set(0,3,2.2);scene.add(rim);
+ const hemi=new THREE.HemisphereLight(0xeaf4fa,0x303438,.32);scene.add(hemi);
+ const key=new THREE.DirectionalLight(0xfff5e8,1.15);key.position.set(-2.5,-2,4);key.castShadow=true;key.shadow.mapSize.set(1536,1536);key.shadow.camera.left=-2;key.shadow.camera.right=2;key.shadow.camera.top=2;key.shadow.camera.bottom=-2;key.shadow.bias=-.00015;scene.add(key);
+ const fill=new THREE.DirectionalLight(0xc7e2f5,.45);fill.position.set(2,1.5,2.8);scene.add(fill);
+ const rim=new THREE.DirectionalLight(0xffffff,.65);rim.position.set(0,3,2.2);scene.add(rim);
  const L=2.4,W=.8,D=.05,corners=[[-L/2,-W/2,0],[L/2,-W/2,0],[L/2,W/2,0],[-L/2,W/2,0]],center=[0,0,-D];
  const product=new THREE.Group();product.position.z=-.05;scene.add(product);
  // Fine directional brushing texture on the steel.
@@ -65,10 +65,13 @@ try{
  for(let y=0;y<512;y++){const v=196+Math.round(15*Math.sin(y*.71)+7*Math.sin(y*2.31));tc.fillStyle='rgb('+v+','+v+','+v+')';tc.fillRect(0,y,1024,1)}
  for(let i=0;i<1600;i++){const y=(i*137)%512;tc.fillStyle='rgba(70,70,70,.20)';tc.fillRect((i*71)%1024,y,25+(i%19)*12,1)}
  const brush=new THREE.CanvasTexture(texCanvas);brush.wrapS=brush.wrapT=THREE.RepeatWrapping;brush.repeat.set(2.4,1.5);brush.colorSpace=THREE.NoColorSpace;brush.anisotropy=renderer.capabilities.getMaxAnisotropy();
- const steel=new THREE.MeshPhysicalMaterial({color:0x87949a,metalness:.94,roughness:.34,roughnessMap:brush,bumpMap:brush,bumpScale:.00012,envMapIntensity:1.65,anisotropy:.55,anisotropyRotation:0,clearcoat:.08,clearcoatRoughness:.3,side:THREE.DoubleSide});
+ const steel=new THREE.MeshPhysicalMaterial({color:0x64747c,metalness:.92,roughness:.43,roughnessMap:brush,bumpMap:brush,bumpScale:.00022,envMapIntensity:1.35,anisotropy:.65,anisotropyRotation:0,clearcoat:.04,clearcoatRoughness:.38,side:THREE.DoubleSide});
  for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4],g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...center],3));g.setAttribute('uv',new THREE.Float32BufferAttribute([a[0]/L+.5,a[1]/W+.5,b[0]/L+.5,b[1]/W+.5,.5,.5],2));g.computeVertexNormals();const face=new THREE.Mesh(g,steel);face.castShadow=true;face.receiveShadow=true;product.add(face)}
- const edgeMat=new THREE.MeshStandardMaterial({color:0xe0e6e8,metalness:.95,roughness:.2,envMapIntensity:1.4});
+ const edgeMat=new THREE.MeshStandardMaterial({color:0xaab5ba,metalness:.9,roughness:.27,envMapIntensity:1.2});
  for(let i=0;i<4;i++){const curve=new THREE.LineCurve3(new THREE.Vector3(...corners[i]),new THREE.Vector3(...corners[(i+1)%4]));const edge=new THREE.Mesh(new THREE.TubeGeometry(curve,1,.006,6,false),edgeMat);product.add(edge)}
+ // Delicate facet junctions define the four sloped triangular planes.
+ const seamMat=new THREE.MeshStandardMaterial({color:0x65747b,metalness:.78,roughness:.4,transparent:true,opacity:.62});
+ for(const p of corners){const path=new THREE.LineCurve3(new THREE.Vector3(...p),new THREE.Vector3(0,0,-D));product.add(new THREE.Mesh(new THREE.TubeGeometry(path,12,.0018,5,false),seamMat));}
  // Drain recess and brushed circular collar.
  const drain=new THREE.Mesh(new THREE.CircleGeometry(.05,64),new THREE.MeshStandardMaterial({color:0x141b1f,metalness:.65,roughness:.34,side:THREE.DoubleSide}));drain.position.set(0,0,-D+.002);product.add(drain);
  const collar=new THREE.Mesh(new THREE.RingGeometry(.052,.064,64),new THREE.MeshPhysicalMaterial({color:0x89969c,metalness:.98,roughness:.18,envMapIntensity:1.8,side:THREE.DoubleSide}));collar.position.set(0,0,-D+.004);product.add(collar);
