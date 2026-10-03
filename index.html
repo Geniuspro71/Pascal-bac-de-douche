@@ -16,7 +16,7 @@
   <label>Nome del progetto<input id="projectName" type="text" placeholder="Es. Bagno principale" required></label>
   <label>Cliente<input id="clientName" type="text" placeholder="Nome e cognome / azienda" required></label>
   <div class="fieldPair"><label>Telefono<input id="clientPhone" type="tel" placeholder="+32 …"></label><label>Email<input id="clientEmail" type="email" placeholder="cliente@email.com"></label></div>
-  <label>Indirizzo del cantiere<input id="siteAddress" type="text" placeholder="Via, numero, città"></label><label>Importa DXF (riferimento 2D)<input id="dxfImport" type="file" accept=".dxf,application/dxf"></label><output id="dxfStatus" aria-live="polite">DXF ASCII: geometrie LINE e LWPOLYLINE visualizzate come riferimento 2D.</output>
+  <label>Indirizzo del cantiere<input id="siteAddress" type="text" placeholder="Via, numero, città"></label><label>Importa DXF (riferimento 2D)<input id="dxfImport" type="file" accept="*/*"></label><output id="dxfStatus" aria-live="polite">DXF ASCII: geometrie LINE e LWPOLYLINE visualizzate come riferimento 2D.</output>
   <div class="fieldPair"><label>Data progetto<input id="projectDate" type="date"></label><label>Tipo ambiente<select id="roomType"><option>Bagno</option><option>Doccia</option><option>Mansarda</option><option>Locale tecnico</option><option>Altro</option></select></label></div>
   <label>Note<textarea id="projectNotes" rows="2" placeholder="Informazioni aggiuntive"></textarea></label>
   <div id="projectStatus" aria-live="polite"></div>
