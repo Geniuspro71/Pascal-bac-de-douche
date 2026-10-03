@@ -31,7 +31,7 @@ jobs:
         run: |
           for i in $(seq 1 18); do
             code=$(curl -L -s -o /tmp/site.html -w "%{http_code}" "https://geniuspro71.github.io/Pascal-bac-de-douche/?check=${GITHUB_SHA}")
-            if [ "$code" = "200" ] && grep -q "Piatto doccia in acciaio inox" /tmp/site.html; then
+            if [ "$code" = "200" ] && grep -q "Piatto doccia · inox" /tmp/site.html; then
               echo "GitHub Pages risponde HTTP 200"
               exit 0
             fi
@@ -56,12 +56,12 @@ jobs:
             await page.waitForTimeout(2500);
             const canvas = await page.locator('#view canvas').evaluate(el => ({width:el.width,height:el.height,rect:el.getBoundingClientRect().toJSON()}));
             if (canvas.width < 100 || canvas.height < 100 || canvas.rect.width < 100 || canvas.rect.height < 100) throw new Error('Canvas 3D presente ma senza dimensioni valide: '+JSON.stringify(canvas));
-            await page.getByRole('button', {name:'Vista iniziale'}).click();
-            await page.getByRole('button', {name:/Quote:/}).click();
-            await page.getByRole('button', {name:'Vista dall’alto'}).click();
+            await page.getByRole('button', {name:'Isometrica'}).click();
+            await page.getByRole('button', {name:/Quote ON/}).click();
+            await page.getByRole('button', {name:'Dall’alto'}).click();
             await page.screenshot({path:'3d-site-check.png',fullPage:true});
             if (errors.length) throw new Error('Errori browser: '+errors.join(' | '));
-            console.log('PASS: canvas 3D caricato e visibile; tre comandi interattivi attivati; nessun errore browser.');
+            console.log('PASS: canvas 3D caricato; viste isometrica e dall’alto e quote attivate; nessun errore browser.');
             console.log('Canvas:',JSON.stringify(canvas));
             await browser.close();
           })().catch(e => { console.error(e); process.exit(1); });
