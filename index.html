@@ -72,9 +72,10 @@ try{
  // Delicate facet junctions define the four sloped triangular planes.
  const seamMat=new THREE.MeshStandardMaterial({color:0x65747b,metalness:.78,roughness:.4,transparent:true,opacity:.62});
  for(const p of corners){const path=new THREE.LineCurve3(new THREE.Vector3(...p),new THREE.Vector3(0,0,-D));product.add(new THREE.Mesh(new THREE.TubeGeometry(path,12,.0018,5,false),seamMat));}
- // Drain recess and brushed circular collar.
- const drain=new THREE.Mesh(new THREE.CircleGeometry(.05,64),new THREE.MeshStandardMaterial({color:0x141b1f,metalness:.65,roughness:.34,side:THREE.DoubleSide}));drain.position.set(0,0,-D+.002);product.add(drain);
- const collar=new THREE.Mesh(new THREE.RingGeometry(.052,.064,64),new THREE.MeshPhysicalMaterial({color:0x89969c,metalness:.98,roughness:.18,envMapIntensity:1.8,side:THREE.DoubleSide}));collar.position.set(0,0,-D+.004);product.add(collar);
+ // Scarico circolare: apertura Ø 10 cm, con bordo metallico concentrico ben leggibile.
+ const drain=new THREE.Mesh(new THREE.CircleGeometry(.05,128),new THREE.MeshStandardMaterial({color:0x101518,metalness:.35,roughness:.26,side:THREE.DoubleSide}));drain.position.set(0,0,-D+.0025);product.add(drain);
+ const collar=new THREE.Mesh(new THREE.RingGeometry(.0505,.060,128),new THREE.MeshPhysicalMaterial({color:0xaebbc1,metalness:.98,roughness:.2,envMapIntensity:2.0,side:THREE.DoubleSide}));collar.position.set(0,0,-D+.004);product.add(collar);
+ const innerLip=new THREE.Mesh(new THREE.RingGeometry(.046,.048,128),new THREE.MeshStandardMaterial({color:0x4d5a60,metalness:.9,roughness:.24,side:THREE.DoubleSide}));innerLip.position.set(0,0,-D+.005);product.add(innerLip);
  // Thin dark underside gives the sheet a visible finished edge.
  const sideMat=new THREE.MeshStandardMaterial({color:0x59656b,metalness:.85,roughness:.29,side:THREE.DoubleSide});
  for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4],a2=[a[0],a[1],-.018],b2=[b[0],b[1],-.018],g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...b2,...a,...b2,...a2],3));g.computeVertexNormals();product.add(new THREE.Mesh(g,sideMat))}
