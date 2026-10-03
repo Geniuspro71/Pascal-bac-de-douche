@@ -10,7 +10,7 @@
 </head>
 <body>
 <div id="view"></div>
-<div class="panel"><h1>Piatto doccia · acrilico</h1><div class="sub">240 × 80 cm · acrilico 5 mm su vetroresina<br>Ribasso 5 cm · scarico rettangolare 11 × 10 cm · 4 falde</div></div>
+<div class="panel"><h1>Piatto doccia · acrilico</h1><div class="sub">240 × 80 cm · acrilico 5 mm su vetroresina<br>Ribasso 5 cm · scarico rettangolare 10 × 10 cm · 4 falde</div></div>
 <div id="hint">Trascina per ruotare · pizzica per ingrandire</div>
 <div id="assistant"><input id="command" type="text" aria-label="Comando materiali" placeholder="Scrivi: pietra blu sulla parete…"><button id="sendCommand" type="button">Applica</button></div>
 <div class="actions"><button id="reset" class="active">Isometrica</button><button id="top">Dall’alto</button><button id="side">Laterale</button><button id="drainView">Scarico</button><button id="dims" class="active">Quote ON</button><button id="steel">Acrilico satinato</button><button id="light" class="active">Luci ON</button><button id="floorPhoto">Foto pavimento</button><button id="wallPhoto">Foto parete</button><button id="voice">🎙 Comando vocale</button><input id="floorFile" type="file" accept="image/*" hidden><input id="wallFile" type="file" accept="image/*" hidden></div>
@@ -122,14 +122,14 @@ try{
  // Pelle acrilica non metallica da 5 mm e corpo di supporto in vetroresina.
  const steel=new THREE.MeshPhysicalMaterial({color:0xf0eee9,metalness:0,roughness:.24,envMapIntensity:.72,clearcoat:.72,clearcoatRoughness:.16,side:THREE.DoubleSide});
  const fiberglassMat=new THREE.MeshStandardMaterial({color:0xe4e0d7,metalness:0,roughness:.62,side:THREE.DoubleSide});
- // Quattro falde inclinate con apertura rettangolare 11 × 10 cm al centro.
+ // Quattro falde inclinate con apertura rettangolare 10 × 10 cm al centro.
  for(let i=0;i<4;i++){
    const a=corners[i],b=corners[(i+1)%4],ax=a[0],ay=a[1],bx=b[0],by=b[1],ex=bx-ax,ey=by-ay;
    const start=Math.atan2(ay,ax),end=Math.atan2(by,bx),sweep=((end-start)%(Math.PI*2)+Math.PI*2)%(Math.PI*2),segments=48;
    const positions=[],uvs=[],indices=[];
    for(let j=0;j<=segments;j++){
      const theta=start+sweep*j/segments,dx=Math.cos(theta),dy=Math.sin(theta),den=dx*ey-dy*ex;
-     const t=(ax*ey-ay*ex)/den,r=Math.min(.055/Math.max(Math.abs(dx),1e-9),.05/Math.max(Math.abs(dy),1e-9)),z=-D*(1-r/t);
+     const t=(ax*ey-ay*ex)/den,r=Math.min(.05/Math.max(Math.abs(dx),1e-9),.05/Math.max(Math.abs(dy),1e-9)),z=-D*(1-r/t);
      positions.push(dx*r,dy*r,z,dx*t,dy*t,0);
      uvs.push(dx*r/L+.5,dy*r/W+.5,dx*t/L+.5,dy*t/W+.5);
    }
@@ -143,10 +143,10 @@ try{
  // Delicate facet junctions define the four sloped triangular planes.
  const seamMat=new THREE.MeshStandardMaterial({color:0xc7c2b9,metalness:0,roughness:.42,transparent:true,opacity:.5});
  for(const p of corners){const path=new THREE.LineCurve3(new THREE.Vector3(...p),new THREE.Vector3(0,0,-D));product.add(new THREE.Mesh(new THREE.TubeGeometry(path,12,.0018,5,false),seamMat));}
- // Scarico rettangolare 11 × 10 cm, con pareti interne e cornice composite.
+ // Scarico rettangolare 10 × 10 cm, con pareti interne e cornice composite.
  const drainMat=new THREE.MeshStandardMaterial({color:0x202629,metalness:0,roughness:.5,side:THREE.DoubleSide});
  const frameMat=new THREE.MeshPhysicalMaterial({color:0xe8e4dc,metalness:0,roughness:.3,clearcoat:.5,side:THREE.DoubleSide});
- const drainDepth=.026,drainX=.11,drainY=.10,frame=.004;
+ const drainDepth=.026,drainX=.10,drainY=.10,frame=.004;
  const wallParts=[
    {x:-(drainX/2+frame/2),y:0,w:frame,h:drainY},
    {x: drainX/2+frame/2,y:0,w:frame,h:drainY},
@@ -162,7 +162,7 @@ try{
  const dims=new THREE.Group();dims.position.z=0;scene.add(dims);const lineMat=new THREE.LineBasicMaterial({color:0xf2f5f6});
  function seg(a,b){dims.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a),new THREE.Vector3(...b)]),lineMat))}
  function tag(str,pos){const c=document.createElement('canvas');c.width=256;c.height=64;const x=c.getContext('2d');x.font='bold 30px system-ui';x.textAlign='center';x.lineWidth=5;x.strokeStyle='rgba(12,18,22,.9)';x.strokeText(str,128,43);x.fillStyle='#ffffff';x.shadowColor='#11191f';x.shadowBlur=4;x.fillText(str,128,43);const t=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false}));s.position.set(...pos);s.scale.set(.48,.12,1);dims.add(s)}
- seg([-1.2,-.55,.018],[1.2,-.55,.018]);tag('240 cm',[0,-.65,.035]);seg([1.32,-.4,.018],[1.32,.4,.018]);tag('80 cm',[1.42,0,.03]);seg([0,0,-.05],[.16,0,-.05]);tag('−5 cm',[.25,.02,-.05]);tag('Scarico 11 × 10 cm',[0,.14,-.04]);
+ seg([-1.2,-.55,.018],[1.2,-.55,.018]);tag('240 cm',[0,-.65,.035]);seg([1.32,-.4,.018],[1.32,.4,.018]);tag('80 cm',[1.42,0,.03]);seg([0,0,-.05],[.16,0,-.05]);tag('−5 cm',[.25,.02,-.05]);tag('Scarico 10 × 10 cm',[0,.14,-.04]);
  const dimsBtn=document.getElementById('dims'),steelBtn=document.getElementById('steel'),lightBtn=document.getElementById('light');
  // Esportazione vettoriale esclusa dalla presente anteprima.
  const gridToggle=()=>{dims.visible=!dims.visible;dimsBtn.textContent='Quote '+(dims.visible?'ON':'OFF');dimsBtn.classList.toggle('active',dims.visible)};dimsBtn.onclick=gridToggle;
