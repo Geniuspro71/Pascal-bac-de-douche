@@ -86,7 +86,7 @@ try{
  const gridToggle=()=>{dims.visible=!dims.visible;dimsBtn.textContent='Quote '+(dims.visible?'ON':'OFF');dimsBtn.classList.toggle('active',dims.visible)};dimsBtn.onclick=gridToggle;
  let polished=false,lightsOn=true;const baseLight=[1.45,.72,.9];
  steelBtn.onclick=()=>{polished=!polished;steel.roughness=polished ? .17 : .31;steel.clearcoat=polished ? .32 : .04;steel.clearcoatRoughness=polished ? .12 : .38;steel.envMapIntensity=polished ? 2.15 : 1.65;steel.needsUpdate=true;steelBtn.textContent=polished?'Inox lucido':'Inox satinato';steelBtn.classList.toggle('active',!polished)};
- lightBtn.onclick=()=>{lightsOn=!lightsOn;key.intensity=lightsOn?baseLight[0]:.12;fill.intensity=lightsOn?baseLight[1]:.05;rim.intensity=lightsOn?baseLight[2]:.08;hemi.intensity=lightsOn?.32:.12;lightBtn.textContent='Luci '+(lightsOn?'ON':'soft');lightBtn.classList.toggle('active',lightsOn)};
+ lightBtn.onclick=()=>{lightsOn=!lightsOn;key.intensity=lightsOn?baseLight[0]:.12;fill.intensity=lightsOn?baseLight[1]:.05;rim.intensity=lightsOn?baseLight[2]:.08;hemi.intensity=lightsOn ? .32 : .12;lightBtn.textContent='Luci '+(lightsOn?'ON':'soft');lightBtn.classList.toggle('active',lightsOn)};
  function aim(pos,target=[0,0,-.015]){camera.position.set(...pos);controls.target.set(...target);controls.update()}
  function initial(){aim([2.3,-2.3,3.25]);document.getElementById('reset').classList.add('active')}
  initial();document.getElementById('reset').onclick=initial;
