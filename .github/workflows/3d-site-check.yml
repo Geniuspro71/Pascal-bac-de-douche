@@ -21,15 +21,20 @@ jobs:
         with:
           node-version: 24
 
-      - name: Verify voice and vector controls exist
+      - name: Verify current interface controls
         run: |
-          grep -q 'id="voice"' index.html
-          grep -q 'window.SpeechRecognition||window.webkitSpeechRecognition' index.html
-          grep -q 'function interpretVoice' index.html
+          set -eu
+          grep -q 'id="roomTools"' index.html
+          grep -q 'id="roomW"' index.html
+          grep -q 'id="roomD"' index.html
+          grep -q 'id="roomH"' index.html
+          grep -q 'id="applyRoom"' index.html
+          grep -q 'id="roomStatus"' index.html
           grep -q 'id="command"' index.html
           grep -q 'id="sendCommand"' index.html
-          grep -q 'id="vector"' index.html
-          grep -q 'piatto-doccia-tavola-preliminare.svg' index.html
+          grep -q 'id="voice"' index.html
+          grep -q 'function interpretVoice' index.html
+          grep -q 'function updateRoomGeometry' index.html
 
       - name: Install Playwright
         run: |
@@ -41,7 +46,7 @@ jobs:
         run: |
           for i in $(seq 1 18); do
             code=$(curl -L -s -o /tmp/site.html -w "%{http_code}" "https://geniuspro71.github.io/Pascal-bac-de-douche/?check=${GITHUB_SHA}")
-            if [ "$code" = "200" ] && grep -q "Piatto doccia · inox" /tmp/site.html && grep -q "apertura circolare reale" /tmp/site.html && grep -q "CylinderGeometry(.05,.05,.026,128,1,true)" /tmp/site.html && grep -q "Quote ON" /tmp/site.html; then
+            if [ "$code" = "200" ] && grep -q "Piatto doccia · acrilico" /tmp/site.html && grep -q "scarico rettangolare 10 × 10 cm" /tmp/site.html && grep -q "Dimensioni stanza" /tmp/site.html && grep -q "function updateRoomGeometry" /tmp/site.html && grep -q "Quote ON" /tmp/site.html; then
               echo "GitHub Pages risponde HTTP 200"
               exit 0
             fi
@@ -66,9 +71,22 @@ jobs:
             await page.waitForTimeout(2500);
             const canvas = await page.locator('#view canvas').evaluate(el => ({width:el.width,height:el.height,rect:el.getBoundingClientRect().toJSON()}));
             if (canvas.width < 100 || canvas.height < 100 || canvas.rect.width < 100 || canvas.rect.height < 100) throw new Error('Canvas 3D presente ma senza dimensioni valide: '+JSON.stringify(canvas));
+            await page.locator('#roomW').fill('4.5');
+            await page.locator('#roomD').fill('10');
+            await page.locator('#roomH').fill('3.1');
+            await page.locator('#applyRoom').click();
+            const roomStatus = await page.locator('#roomStatus').textContent();
+            if (!roomStatus.includes('4,5') || !roomStatus.includes('10') || !roomStatus.includes('3,1')) throw new Error('Formulario dimensioni non applicato: '+roomStatus);
+            await page.locator('#command').fill('Carraré sul pavimento');
+            await page.locator('#sendCommand').click();
+            if ((await page.locator('#error').textContent()).trim()) throw new Error('Comando materiale segnalato come errore: '+await page.locator('#error').textContent());
             await page.getByRole('button', {name:'Isometrica'}).click();
             await page.getByRole('button', {name:/Quote ON/}).click();
             await page.getByRole('button', {name:'Dall’alto'}).click();
+            await page.getByRole('button', {name:'Laterale'}).click();
+            await page.getByRole('button', {name:'Scarico'}).click();
+            await page.getByRole('button', {name:/Acrilico satinato/}).click();
+            await page.getByRole('button', {name:/Luci ON/}).click();
             await page.screenshot({path:'3d-site-check.png',fullPage:true});
             if (errors.length) throw new Error('Errori browser: '+errors.join(' | '));
             console.log('PASS: canvas 3D caricato; viste isometrica e dall’alto e quote attivate; nessun errore browser.');
