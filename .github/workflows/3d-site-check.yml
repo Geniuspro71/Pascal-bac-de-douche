@@ -24,6 +24,7 @@ jobs:
       - name: Verify current interface controls
         run: |
           set -eu
+          grep -q 'content="single-view-20261003"' index.html
           grep -q 'id="roomTools"' index.html
           grep -q 'id="roomW"' index.html
           grep -q 'id="roomD"' index.html
@@ -46,7 +47,7 @@ jobs:
         run: |
           for i in $(seq 1 18); do
             code=$(curl -L -s -o /tmp/site.html -w "%{http_code}" "https://geniuspro71.github.io/Pascal-bac-de-douche/?check=${GITHUB_SHA}")
-            if [ "$code" = "200" ] && grep -q "Piatto doccia · acrilico" /tmp/site.html && grep -q "scarico rettangolare 10 × 10 cm" /tmp/site.html && grep -q "Dimensioni stanza" /tmp/site.html && grep -q "function updateRoomGeometry" /tmp/site.html && grep -q "Quote ON" /tmp/site.html; then
+            if [ "$code" = "200" ] && grep -q "content=\"single-view-20261003\"" /tmp/site.html && grep -q "Piatto doccia · acrilico" /tmp/site.html && grep -q "scarico rettangolare 10 × 10 cm" /tmp/site.html && grep -q "Dimensioni stanza" /tmp/site.html && grep -q "function updateRoomGeometry" /tmp/site.html && grep -q "Quote ON" /tmp/site.html; then
               echo "GitHub Pages risponde HTTP 200"
               exit 0
             fi
@@ -66,7 +67,9 @@ jobs:
             const errors = [];
             page.on('pageerror', e => errors.push(e.message));
             page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-            await page.goto('https://geniuspro71.github.io/Pascal-bac-de-douche/?check=' + Date.now(), {waitUntil:'networkidle',timeout:90000});
+            await page.goto('https://geniuspro71.github.io/Pascal-bac-de-douche/?check=single-view-20261003-' + Date.now(), {waitUntil:'networkidle',timeout:90000});
+            const appVersion = await page.locator('meta[name="app-version"]').getAttribute('content');
+            if (appVersion !== 'single-view-20261003') throw new Error('GitHub Pages serve una versione non aggiornata: '+appVersion);
             await page.waitForSelector('#view canvas', {timeout:45000});
             await page.waitForTimeout(2500);
             const canvas = await page.locator('#view canvas').evaluate(el => ({width:el.width,height:el.height,rect:el.getBoundingClientRect().toJSON()}));
