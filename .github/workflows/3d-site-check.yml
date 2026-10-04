@@ -1,150 +1,52 @@
-name: Verify 3D shower tray site
+name: Verify Pascal shared geometry
 
 on:
   push:
+    branches: [main, 'repair/**']
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: pascal-qa-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  browser-check:
+  test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
-      - name: Checkout
+      - name: Checkout exact revision
         uses: actions/checkout@v5
 
       - name: Set up Node
         uses: actions/setup-node@v5
         with:
           node-version: 24
+          cache: npm
 
-      - name: Verify current interface controls
-        run: |
-          set -eu
-          grep -q 'content="project-wizard-4step-20261003-r2"' index.html
-          grep -q 'id="screen1"' index.html
-          grep -q 'id="screen2"' index.html
-          grep -q 'id="screen3"' index.html
-          grep -q 'id="screen4"' index.html
-          grep -q 'id="toDocuments"' index.html
-          grep -q 'id="exportDocs"' index.html
-          grep -q 'id="projectName"' index.html
-          grep -q 'id="clientName"' index.html
-          grep -q 'id="planSvg"' index.html
-          grep -q 'id="addOpening"' index.html
-          grep -q 'function drawPlan' index.html
-          grep -q 'overflow:hidden' index.html
-          grep -q 'id="roomTools"' index.html
-          grep -q 'id="roomW"' index.html
-          grep -q 'id="roomD"' index.html
-          grep -q 'id="roomH"' index.html
-          grep -q 'id="applyRoom"' index.html
-          grep -q 'id="roomStatus"' index.html
-          grep -q 'id="command"' index.html
-          grep -q 'id="sendCommand"' index.html
-          grep -q 'function interpretVoice' index.html
-          ! grep -q 'class="actions"' index.html
-          ! grep -q 'id="dims"' index.html
-          ! grep -q 'id="voice"' index.html
-          grep -q 'function updateRoomGeometry' index.html
+      - name: Install pinned dependencies
+        run: npm ci
 
-      - name: Check inline JavaScript syntax
-        run: |
-          node -e "const fs=require('fs');const html=fs.readFileSync('index.html','utf8');const m=html.match(/<script type=\"module\">([\\s\\S]*?)<\\/script>/);if(!m)throw new Error('Modulo JavaScript assente');fs.writeFileSync('/tmp/site-check.mjs',m[1]);"
-          node --check /tmp/site-check.mjs
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
 
-      - name: Install Playwright
-        run: |
-          npm init -y
-          npm install --no-save playwright
-          npx playwright install --with-deps chromium
+      - name: Syntax and geometry regression tests
+        run: npm run check:syntax && npm run test:unit
 
-      - name: Wait for GitHub Pages
-        run: |
-          for i in $(seq 1 18); do
-            code=$(curl -L -s -o /tmp/site.html -w "%{http_code}" "https://geniuspro71.github.io/Pascal-bac-de-douche/?check=${GITHUB_SHA}")
-            if [ "$code" = "200" ] && grep -q "content=\"project-wizard-4step-20261003-r2\"" /tmp/site.html && grep -q "id=\"screen1\"" /tmp/site.html && grep -q "id=\"screen2\"" /tmp/site.html && grep -q "id=\"screen3\"" /tmp/site.html && grep -q "id=\"projectName\"" /tmp/site.html && grep -q "id=\"clientName\"" /tmp/site.html && grep -q "id=\"planSvg\"" /tmp/site.html && grep -q "id=\"addOpening\"" /tmp/site.html && grep -q "function drawPlan" /tmp/site.html && grep -q "function updateRoomGeometry" /tmp/site.html; then
-              echo "GitHub Pages risponde HTTP 200"
-              exit 0
-            fi
-            echo "Tentativo $i: HTTP $code, attendo pubblicazione..."
-            sleep 10
-          done
-          echo "GitHub Pages non ha pubblicato la versione verificabile entro 3 minuti"
-          exit 1
+      - name: Interactive browser regression tests
+        run: npm run test:browser
 
-      - name: Test interactive 3D in Chromium
-        run: |
-          cat > /tmp/check-site.cjs <<'EOF'
-          const { chromium } = require(process.cwd() + '/node_modules/playwright');
-          (async () => {
-            const browser = await chromium.launch({headless:true});
-            const page = await browser.newPage({viewport:{width:1280,height:900}, deviceScaleFactor:1});
-            const errors = [];
-            page.on('pageerror', e => errors.push(e.message));
-            page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-            await page.goto('https://geniuspro71.github.io/Pascal-bac-de-douche/?check=project-wizard-4step-20261003-r2-' + Date.now(), {waitUntil:'networkidle',timeout:90000});
-            const appVersion = await page.locator('meta[name="app-version"]').getAttribute('content');
-            if (appVersion !== 'project-wizard-4step-20261003-r2') throw new Error('GitHub Pages serve una versione non aggiornata: '+appVersion);
-            const noScroll = async () => {
-              const v = await page.evaluate(() => ({w:document.documentElement.scrollWidth,h:document.documentElement.scrollHeight,iw:innerWidth,ih:innerHeight}));
-              if(v.w>v.iw+1 || v.h>v.ih+1) throw new Error('Scroll non previsto: '+JSON.stringify(v));
-            };
-            await page.locator('#projectName').fill('Test ambiente');
-            await page.locator('#clientName').fill('Cliente demo');
-            await page.locator('#toEditor').click();
-            if (!(await page.locator('#screen2').evaluate(el=>el.classList.contains('active')))) throw new Error('Navigazione alla schermata 2D non riuscita');
-            await page.locator('#roomW').fill('4.5');
-            await page.locator('#roomD').fill('10');
-            await page.locator('#roomH').fill('3.1');
-            await page.locator('#applyRoom').click();
-            const roomStatus=await page.locator('#roomStatus').textContent();
-            if(!roomStatus.includes('4,5')||!roomStatus.includes('10')||!roomStatus.includes('3,1')) throw new Error('Formulario dimensioni non applicato: '+roomStatus);
-            await page.locator('#openingType').selectOption('door');
-            await page.locator('#addOpening').click();
-            await page.locator('#openingWidth').fill('0.95');
-            await page.locator('#openingHeight').fill('2.05');
-            await page.locator('#openingOffset').fill('0.8');
-            await page.locator('#openingWidth').dispatchEvent('change');
-            if(!(await page.locator('#planSvg').textContent()).includes('0.95×2.05')) throw new Error('Quote dell’apertura non aggiornate');
-            await page.locator('#openingType').selectOption('window');
-            await page.locator('#addOpening').click();
-            await page.locator('#roofType').selectOption('gable');
-            if(await page.locator('#planSvg .planItem').count()<1 || !(await page.locator('#planSvg').textContent()).includes('4,5')) throw new Error('Pianta 2D non aggiornata con quote/aperture');
-            await noScroll();
-            await page.locator('#toResult').click();
-            await page.waitForSelector('#view canvas', {timeout:45000});
-            await page.waitForFunction(()=>typeof window.__openingCount==='function' && window.__openingCount()>=11,null,{timeout:10000});
-            await page.waitForTimeout(1200);
-            const canvas=await page.locator('#view canvas').evaluate(el=>({width:el.width,height:el.height,rect:el.getBoundingClientRect().toJSON()}));
-            if(canvas.width<100||canvas.height<100||canvas.rect.width<100||canvas.rect.height<100) throw new Error('Canvas 3D senza dimensioni valide: '+JSON.stringify(canvas));
-            if(!(await page.locator('#screen3').evaluate(el=>el.classList.contains('active')))) throw new Error('Schermata risultato non attiva');
-            await page.locator('#command').fill('Carrara sul pavimento');
-            await page.locator('#sendCommand').click();
-            if((await page.locator('#error').textContent()).trim()) throw new Error('Comando materiale segnalato come errore: '+await page.locator('#error').textContent());
-            if(await page.locator('.actions button').count()) throw new Error('Vecchi pulsanti vista ancora presenti');
-            await page.locator('#toDocuments').click();
-            if (!(await page.locator('#screen4').evaluate(el=>el.classList.contains('active')))) throw new Error('Schermata documenti non attiva');
-            await noScroll();
-            await page.locator('#backResult').click();
-            if (!(await page.locator('#screen3').evaluate(el=>el.classList.contains('active')))) throw new Error('Ritorno al risultato non riuscito');
-            await noScroll();
-            await page.screenshot({path:'3d-site-check.png',fullPage:true});
-            if(errors.length) throw new Error('Errori browser: '+errors.join(' | '));
-            console.log('PASS: tre schermate, editor 2D, dimensioni, aperture, copertura, risultato 3D e assenza di scroll verificati.');
-            console.log('Canvas:',JSON.stringify(canvas));
-            await browser.close();
-          })().catch(e => { console.error(e); process.exit(1); });
-          EOF
-          node /tmp/check-site.cjs
-
-      - name: Upload screenshot
+      - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: 3d-site-check-screenshot
-          path: 3d-site-check.png
+          name: pascal-browser-evidence-${{ github.sha }}
+          path: |
+            test-results/**/*.png
+            playwright-report/
           if-no-files-found: ignore
+          retention-days: 14

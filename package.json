@@ -1,0 +1,20 @@
+{
+  "name": "pascal-bac-de-douche",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "npm run check:syntax && npm run test:unit && npm run test:browser",
+    "check:syntax": "node --check src/geometry.mjs && node --check src/app.mjs",
+    "test": "npm run check",
+    "test:unit": "node --test tests/geometry.test.mjs",
+    "test:browser": "playwright test",
+    "serve": "python3 -m http.server 4173 --bind 127.0.0.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.55.1"
+  },
+  "dependencies": {
+    "three": "0.160.0"
+  }
+}
